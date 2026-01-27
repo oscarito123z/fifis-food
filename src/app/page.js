@@ -53,17 +53,45 @@ export default function Home() {
   }, 0);
 
   const filtrados = categoria === 'Todas' ? productos : productos.filter(p => p.cat === categoria);
-
-  // Cálculo del subtotal para el producto que se está viendo en detalle
   const cantidadEnDetalle = productoDetalle ? (pedido[productoDetalle.id] || 0) : 0;
   const subtotalDetalle = productoDetalle ? (productoDetalle.precio * cantidadEnDetalle) : 0;
 
   return (
     <main style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
       
-      <header style={{ padding: '30px 20px', textAlign: 'center', borderBottom: '1px solid #222', position: 'sticky', top: 0, backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(10px)', zIndex: 50 }}>
-        <h1 style={{ color: '#FF8C00', fontSize: '32px', fontWeight: '900', fontStyle: 'italic', margin: 0 }}>Fifi's</h1>
-        <p style={{ letterSpacing: '4px', fontSize: '12px', margin: 0 }}>FOOD</p>
+      {/* HEADER TIPO MCDONALDS */}
+      <header style={{ 
+        padding: '20px', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        borderBottom: '1px solid #222', 
+        position: 'sticky', 
+        top: 0, 
+        backgroundColor: 'rgba(0,0,0,0.95)', 
+        backdropFilter: 'blur(10px)', 
+        zIndex: 50 
+      }}>
+        <div>
+          <h1 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>Hola, bienvenido a</h1>
+          <h2 style={{ color: '#FF8C00', fontSize: '22px', fontWeight: '900', fontStyle: 'italic', margin: 0 }}>Fifi's Food</h2>
+        </div>
+        <div style={{ 
+          width: '50px', 
+          height: '50px', 
+          borderRadius: '50%', 
+          backgroundColor: '#FF8C00', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          border: '2px solid #333',
+          fontWeight: '900',
+          color: '#000',
+          fontSize: '12px',
+          textAlign: 'center'
+        }}>
+          LOGO
+        </div>
       </header>
 
       <div style={{ padding: '15px 20px 0 20px' }}>
@@ -76,6 +104,7 @@ export default function Home() {
         </div>
       </div>
 
+      {/* SELECTOR DE CATEGORÍAS */}
       <div style={{ display: 'flex', overflowX: 'auto', padding: '20px', gap: '10px', scrollbarWidth: 'none' }}>
         <style dangerouslySetInnerHTML={{__html: `div::-webkit-scrollbar { display: none; }` }} />
         {categorias.map(cat => (
@@ -107,20 +136,18 @@ export default function Home() {
         </div>
       </section>
 
+      {/* MODAL DETALLE */}
       <AnimatePresence>
         {productoDetalle && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setProductoDetalle(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 200 }} />
             <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#111', borderTopLeftRadius: '30px', borderTopRightRadius: '30px', padding: '40px 30px', zIndex: 300, maxHeight: '90vh' }}>
               <div style={{ width: '40px', height: '4px', backgroundColor: '#333', borderRadius: '2px', margin: '-20px auto 25px auto' }} />
-              
               <div style={{ width: '100%', height: '200px', backgroundColor: '#1a1a1a', borderRadius: '20px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333' }}>
                 <span style={{ fontSize: '12px' }}>IMAGEN DEL PRODUCTO</span>
               </div>
-
               <h2 style={{ fontSize: '28px', fontWeight: '900', margin: '0 0 10px 0' }}>{productoDetalle.nombre}</h2>
               <p style={{ color: '#aaa', fontSize: '15px', lineHeight: '1.6', marginBottom: '30px' }}>{productoDetalle.desc}</p>
-
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
                 <span style={{ fontSize: '26px', fontWeight: '900', color: '#FF8C00' }}>C$ {productoDetalle.precio}</span>
                 <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#1a1a1a', borderRadius: '20px', padding: '8px' }}>
@@ -129,14 +156,8 @@ export default function Home() {
                   <button onClick={(e) => { e.stopPropagation(); sumarProducto(productoDetalle.id); }} style={{ backgroundColor: '#FF8C00', border: 'none', width: '40px', height: '40px', borderRadius: '15px', fontWeight: 'bold', fontSize: '20px' }}>+</button>
                 </div>
               </div>
-
-              {/* BOTÓN DINÁMICO TIPO MCDONALDS */}
               <button onClick={() => setProductoDetalle(null)} style={{ 
-                width: '100%', 
-                backgroundColor: cantidadEnDetalle > 0 ? '#FF8C00' : '#333', 
-                color: cantidadEnDetalle > 0 ? '#000' : '#fff', 
-                padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '16px',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                width: '100%', backgroundColor: cantidadEnDetalle > 0 ? '#FF8C00' : '#333', color: cantidadEnDetalle > 0 ? '#000' : '#fff', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
               }}>
                 <span>{cantidadEnDetalle > 0 ? 'AÑADIR AL CARRITO' : 'VOLVER AL MENÚ'}</span>
                 {cantidadEnDetalle > 0 && <span>C$ {subtotalDetalle}</span>}
@@ -146,6 +167,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
+      {/* BOTÓN FLOTANTE */}
       {totalItems > 0 && !productoDetalle && (
         <motion.div initial={{ y: 100 }} animate={{ y: 0 }} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', zIndex: 100 }}>
           <button onClick={() => setVerResumen(true)} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '16px', boxShadow: '0 10px 30px rgba(255,140,0,0.4)' }}>
@@ -154,6 +176,7 @@ export default function Home() {
         </motion.div>
       )}
 
+      {/* CARRITO */}
       <AnimatePresence>
         {verResumen && (
           <>
