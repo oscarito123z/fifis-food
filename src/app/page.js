@@ -1,11 +1,29 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Home() {
   const [categoria, setCategoria] = useState('Todas');
   const [pedido, setPedido] = useState({});
   const [verResumen, setVerResumen] = useState(false);
+  const [estaAbierto, setEstaAbierto] = useState(false);
+
+  // Lógica para verificar el horario de Nicaragua (6pm - 11pm)
+  useEffect(() => {
+    const revisarHorario = () => {
+      const ahora = new Date();
+      // Ajustamos a la hora de Nicaragua (UTC-6)
+      const opciones = { timeZone: 'America/Managua', hour: 'numeric', hour12: false };
+      const horaNicaragua = parseInt(new Intl.DateTimeFormat('en-US', opciones).format(ahora));
+      
+      // Abierto de las 18:00 (6pm) a las 23:00 (11pm)
+      setEstaAbierto(horaNicaragua >= 18 && horaNicaragua < 23);
+    };
+
+    revisarHorario();
+    const intervalo = setInterval(revisarHorario, 60000); // Revisa cada minuto
+    return () => clearInterval(intervalo);
+  }, []);
 
   const categorias = ['Todas', 'Hamburguesas', 'Nachos', 'Salchipapas', 'Bebidas', 'Extras'];
   
@@ -42,7 +60,7 @@ export default function Home() {
   const totalItems = Object.values(pedido).reduce((acc, cant) => acc + cant, 0);
   const montoTotal = Object.entries(pedido).reduce((acc, [id, cant]) => {
     const prod = productos.find(p => p.id === parseInt(id));
-    return acc + (prod.precio * cant);
+    return acc + (prod ? prod.precio * cant : 0);
   }, 0);
 
   const filtrados = categoria === 'Todas' ? productos : productos.filter(p => p.cat === categoria);
@@ -55,6 +73,22 @@ export default function Home() {
         <h1 style={{ color: '#FF8C00', fontSize: '32px', fontWeight: '900', fontStyle: 'italic', margin: 0 }}>Fifi's</h1>
         <p style={{ letterSpacing: '4px', fontSize: '12px', margin: 0 }}>FOOD</p>
       </header>
+
+      {/* AVISO DE HORARIO (NUEVO) */}
+      <div style={{ padding: '15px 20px 0 20px' }}>
+        <div style={{
+          padding: '12px',
+          borderRadius: '15px',
+          backgroundColor: estaAbierto ? 'rgba(21, 87, 36, 0.2)' : 'rgba(114, 28, 36, 0.2)',
+          color: estaAbierto ? '#28a745' : '#ff4444',
+          border: `1px solid ${estaAbierto ? '#28a745' : '#ff4444'}`,
+          textAlign: 'center',
+          fontSize: '14px',
+          fontWeight: 'bold'
+        }}>
+          {estaAbierto ? '● ¡ESTAMOS ATENDIENDO! (6pm - 11pm)' : '○ CERRADO POR AHORA (Abrimos a las 6pm)'}
+        </div>
+      </div>
 
       {/* SELECTOR DE CATEGORÍAS */}
       <div style={{ display: 'flex', overflowX: 'auto', padding: '20px', gap: '10px', scrollbarWidth: 'none' }}>
@@ -71,7 +105,7 @@ export default function Home() {
         ))}
       </div>
 
-      {/* LISTA DE PRODUCTOS CON DESCRIPCIÓN */}
+      {/* LISTA DE PRODUCTOS */}
       <section style={{ padding: '0 20px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {filtrados.map(prod => (
@@ -85,17 +119,11 @@ export default function Home() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ flex: 1, paddingRight: '15px' }}>
                   <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>{prod.nombre}</h3>
-                  
-                  {/* AQUÍ ESTÁN LAS DESCRIPCIONES */}
-                  <p style={{ color: '#777', fontSize: '12px', margin: '4px 0 10px 0', lineHeight: '1.4' }}>
-                    {prod.desc}
-                  </p>
-                  
+                  <p style={{ color: '#777', fontSize: '12px', margin: '4px 0 10px 0', lineHeight: '1.4' }}>{prod.desc}</p>
                   <span style={{ color: prod.agotado ? '#555' : '#FF8C00', fontWeight: '900', fontSize: '19px' }}>
                     {prod.agotado ? 'AGOTADO' : `C$ ${prod.precio}`}
                   </span>
                 </div>
-                
                 {!prod.agotado && (
                   <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#1a1a1a', borderRadius: '15px', padding: '5px' }}>
                     {pedido[prod.id] > 0 && (
@@ -132,24 +160,21 @@ export default function Home() {
                 <h2 style={{ fontSize: '24px', fontWeight: '900', color: '#FF8C00', margin: 0 }}>Tu Pedido</h2>
                 <button onClick={limpiarPedido} style={{ backgroundColor: 'transparent', border: 'none', color: '#ff4444', fontWeight: 'bold', fontSize: '14px' }}>BORRAR TODO</button>
               </div>
-              
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
                 {Object.entries(pedido).map(([id, cant]) => {
                   const item = productos.find(p => p.id === parseInt(id));
                   return (
                     <div key={id} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #222', paddingBottom: '10px' }}>
-                      <span><span style={{ color: '#FF8C00', fontWeight: 'bold' }}>{cant}x</span> {item.nombre}</span>
-                      <span style={{ fontWeight: 'bold' }}>C$ {item.precio * cant}</span>
+                      <span><span style={{ color: '#FF8C00', fontWeight: 'bold' }}>{cant}x</span> {item?.nombre}</span>
+                      <span style={{ fontWeight: 'bold' }}>C$ {item ? item.precio * cant : 0}</span>
                     </div>
                   );
                 })}
               </div>
-
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <span style={{ fontSize: '20px', fontWeight: 'bold' }}>Total:</span>
                 <span style={{ fontSize: '24px', fontWeight: '900', color: '#FF8C00' }}>C$ {montoTotal}</span>
               </div>
-
               <button onClick={() => setVerResumen(false)} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '16px' }}>AGREGAR MÁS</button>
             </motion.div>
           </>
