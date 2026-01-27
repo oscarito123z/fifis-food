@@ -7,7 +7,7 @@ export default function Home() {
   const [pedido, setPedido] = useState({});
   const [verResumen, setVerResumen] = useState(false);
   const [estaAbierto, setEstaAbierto] = useState(false);
-  const [productoDetalle, setProductoDetalle] = useState(null); // Nuevo: para el modal tipo McDonald's
+  const [productoDetalle, setProductoDetalle] = useState(null);
 
   useEffect(() => {
     const revisarHorario = () => {
@@ -53,6 +53,10 @@ export default function Home() {
   }, 0);
 
   const filtrados = categoria === 'Todas' ? productos : productos.filter(p => p.cat === categoria);
+
+  // Cálculo del subtotal para el producto que se está viendo en detalle
+  const cantidadEnDetalle = productoDetalle ? (pedido[productoDetalle.id] || 0) : 0;
+  const subtotalDetalle = productoDetalle ? (productoDetalle.precio * cantidadEnDetalle) : 0;
 
   return (
     <main style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
@@ -103,7 +107,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* MODAL DE DETALLE (TIPO MCDONALDS) */}
       <AnimatePresence>
         {productoDetalle && (
           <>
@@ -112,7 +115,6 @@ export default function Home() {
               <div style={{ width: '40px', height: '4px', backgroundColor: '#333', borderRadius: '2px', margin: '-20px auto 25px auto' }} />
               
               <div style={{ width: '100%', height: '200px', backgroundColor: '#1a1a1a', borderRadius: '20px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333' }}>
-                {/* Aquí irá la imagen después */}
                 <span style={{ fontSize: '12px' }}>IMAGEN DEL PRODUCTO</span>
               </div>
 
@@ -123,20 +125,27 @@ export default function Home() {
                 <span style={{ fontSize: '26px', fontWeight: '900', color: '#FF8C00' }}>C$ {productoDetalle.precio}</span>
                 <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#1a1a1a', borderRadius: '20px', padding: '8px' }}>
                   <button onClick={(e) => { e.stopPropagation(); restarProducto(productoDetalle.id); }} style={{ backgroundColor: '#333', border: 'none', color: '#fff', width: '40px', height: '40px', borderRadius: '15px', fontSize: '20px' }}>-</button>
-                  <span style={{ margin: '0 20px', fontWeight: 'bold', fontSize: '20px' }}>{pedido[productoDetalle.id] || 0}</span>
+                  <span style={{ margin: '0 20px', fontWeight: 'bold', fontSize: '20px' }}>{cantidadEnDetalle}</span>
                   <button onClick={(e) => { e.stopPropagation(); sumarProducto(productoDetalle.id); }} style={{ backgroundColor: '#FF8C00', border: 'none', width: '40px', height: '40px', borderRadius: '15px', fontWeight: 'bold', fontSize: '20px' }}>+</button>
                 </div>
               </div>
 
-              <button onClick={() => setProductoDetalle(null)} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '16px' }}>
-                {pedido[productoDetalle.id] > 0 ? 'LISTO' : 'VOLVER AL MENÚ'}
+              {/* BOTÓN DINÁMICO TIPO MCDONALDS */}
+              <button onClick={() => setProductoDetalle(null)} style={{ 
+                width: '100%', 
+                backgroundColor: cantidadEnDetalle > 0 ? '#FF8C00' : '#333', 
+                color: cantidadEnDetalle > 0 ? '#000' : '#fff', 
+                padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '16px',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+              }}>
+                <span>{cantidadEnDetalle > 0 ? 'AÑADIR AL CARRITO' : 'VOLVER AL MENÚ'}</span>
+                {cantidadEnDetalle > 0 && <span>C$ {subtotalDetalle}</span>}
               </button>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* BOTÓN FLOTANTE CARRITO */}
       {totalItems > 0 && !productoDetalle && (
         <motion.div initial={{ y: 100 }} animate={{ y: 0 }} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', zIndex: 100 }}>
           <button onClick={() => setVerResumen(true)} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '16px', boxShadow: '0 10px 30px rgba(255,140,0,0.4)' }}>
@@ -145,7 +154,6 @@ export default function Home() {
         </motion.div>
       )}
 
-      {/* MODAL DEL RESUMEN (CARRITO) */}
       <AnimatePresence>
         {verResumen && (
           <>
