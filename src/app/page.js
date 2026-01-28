@@ -29,19 +29,19 @@ export default function Home() {
     
     // POLLO
     { id: 3, nombre: "Fifi Wings (6 unidades)", precio: 190, cat: "Pollo", desc: "Alitas crujientes bañadas en tu salsa favorita: BBQ, Búfalo o Miel Mostaza.", agotado: false },
-    { id: 4, nombre: "Chicken Tenders", precio: 165, cat: "Pollo", desc: "Tiras de pechuga de pollo empanizadas a mano, acompañadas de papas fritas y salsa ranch.", agotado: false },
+    { id: 4, nombre: "Nuggets de pollo (10 unidades)", precio: 200, cat: "Pollo", desc: "Pequeños trozos de pollo empanizado, frito y crujiente.", agotado: false },
     
     // SALCHIPAPAS
-    { id: 5, nombre: "Salchipapa Jumbo", precio: 120, cat: "Salchipapas", desc: "Cama de papas fritas extra crujientes con salchicha parrillera troceada y salsa rosada.", agotado: false },
+    { id: 5, nombre: "Salchipapa", precio: 120, cat: "Salchipapas", desc: "Cama de papas fritas crujientes con salchicha parrillera troceada y queso derretido.", agotado: false },
     
     // ANTOJOS
-    { id: 6, nombre: "Papas Clásicas", precio: 80, cat: "Antojos", desc: "Nuestras clásicas papas fritas con un toque de sal de mar y especias de la casa.", agotado: false },
-    { id: 7, nombre: "Dados de Queso", precio: 110, cat: "Antojos", desc: "Cubos de queso empanizados y fritos, servidos con una deliciosa mermelada de tomate.", agotado: false },
-    { id: 8, nombre: "Papas Waffle", precio: 95, cat: "Antojos", desc: "Papas en corte waffle, súper crujientes por fuera y suaves por dentro.", agotado: false },
+    { id: 6, nombre: "Papas Clásicas", precio: 80, cat: "Antojos", desc: "Clásicas papas fritas con un toque de sal y especias de la casa.", agotado: false },
+    { id: 7, nombre: "Dados de Queso", precio: 60, cat: "Antojos", desc: "Deliciosos Cubos de queso fritos.", agotado: false },
+    { id: 8, nombre: "Papas Waffle", precio: 90, cat: "Antojos", desc: "Papas en corte waffle, súper crujientes por fuera y suaves por dentro.", agotado: false },
     
     // BEBIDAS
-    { id: 9, nombre: "Coca-Cola", precio: 60, cat: "Bebidas", desc: "Refrescante Coca-Cola original en lata de 355ml.", agotado: false },
-    { id: 10, nombre: "Té Frío", precio: 35, cat: "Bebidas", desc: "Té negro con infusión de limón natural y azúcar de caña.", agotado: false },
+    { id: 9, nombre: "Coca-Cola", precio: 30, cat: "Bebidas", desc: "Coca-Cola original en lata de 355ml.", agotado: false },
+    { id: 10, nombre: "Té Frío", precio: 35, cat: "Bebidas", desc: "Té negro con infusión de limón natural.", agotado: false },
   ];
 
   const abrirDetalle = (prod) => {
