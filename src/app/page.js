@@ -91,6 +91,7 @@ export default function Home() {
         </div>
       </div>
 
+      {/* SELECTOR DE CATEGORÍAS */}
       <div style={{ display: 'flex', overflowX: 'auto', padding: '20px', gap: '10px', scrollbarWidth: 'none' }}>
         <style dangerouslySetInnerHTML={{__html: `div::-webkit-scrollbar { display: none; }` }} />
         {categorias.map(cat => (
@@ -100,6 +101,7 @@ export default function Home() {
         ))}
       </div>
 
+      {/* LISTADO DE PRODUCTOS */}
       <section style={{ padding: '0 20px 100px 20px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {filtrados.map(prod => (
@@ -153,16 +155,16 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* BOTÓN FLOTANTE */}
+      {/* BOTÓN FLOTANTE ACTUALIZADO */}
       {totalItems > 0 && !productoDetalle && (
         <motion.div initial={{ y: 100 }} animate={{ y: 0 }} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', zIndex: 100 }}>
-          <button onClick={() => setVerResumen(true)} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '16px', boxShadow: '0 10px 30px rgba(255,140,0,0.4)' }}>
-            VER CARRITO ({totalItems}) - C$ {montoTotal}
+          <button onClick={() => setVerResumen(true)} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '15px', boxShadow: '0 10px 30px rgba(255,140,0,0.4)' }}>
+            Ver mi Carrito (C$ {montoTotal} por {totalItems} artículos)
           </button>
         </motion.div>
       )}
 
-      {/* CARRITO */}
+      {/* MODAL CARRITO */}
       <AnimatePresence>
         {verResumen && (
           <>
