@@ -58,6 +58,16 @@ export default function Home() {
     });
   };
 
+  // Función para eliminar el producto por completo (la X)
+  const eliminarDelCarrito = (id) => {
+    setPedido(prev => {
+      const nuevo = { ...prev };
+      delete nuevo[id];
+      if (Object.keys(nuevo).length === 0) setVerResumen(false);
+      return nuevo;
+    });
+  };
+
   const totalItems = Object.values(pedido).reduce((acc, cant) => acc + cant, 0);
   const montoTotal = Object.entries(pedido).reduce((acc, [id, cant]) => {
     const prod = productos.find(p => p.id === parseInt(id));
@@ -82,7 +92,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* CATEGORIAS */}
+      {/* CATEGORÍAS */}
       <div style={{ display: 'flex', overflowX: 'auto', padding: '20px', gap: '10px' }}>
         {['Todas', 'Hamburguesas', 'Nachos', 'Salchipapas', 'Bebidas', 'Extras'].map(cat => (
           <button key={cat} onClick={() => setCategoria(cat)} style={{ padding: '10px 25px', borderRadius: '50px', border: 'none', backgroundColor: categoria === cat ? '#FF8C00' : '#1a1a1a', color: categoria === cat ? '#000' : '#fff', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
@@ -91,7 +101,7 @@ export default function Home() {
         ))}
       </div>
 
-      {/* MENU LIST */}
+      {/* LISTA DE MENÚ */}
       <section style={{ padding: '0 20px 120px 20px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {filtrados.map(prod => (
@@ -132,7 +142,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* BOTON FLOTANTE PRINCIPAL */}
+      {/* BOTÓN FLOTANTE PRINCIPAL */}
       {totalItems > 0 && !productoDetalle && !verResumen && (
         <motion.div initial={{ y: 100 }} animate={{ y: 0 }} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', zIndex: 100 }}>
           <button onClick={() => setVerResumen(true)} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '15px', boxShadow: '0 10px 30px rgba(255,140,0,0.4)' }}>
@@ -141,23 +151,20 @@ export default function Home() {
         </motion.div>
       )}
 
-      {/* VENTANA DE CARRITO TIPO MCDONALDS */}
+      {/* VENTANA DE CARRITO */}
       <AnimatePresence>
         {verResumen && (
           <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'tween', duration: 0.3 }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#000', zIndex: 500, display: 'flex', flexDirection: 'column' }}>
-            
-            {/* Nav del Carrito */}
             <div style={{ padding: '20px', display: 'flex', alignItems: 'center', borderBottom: '1px solid #222' }}>
               <button onClick={() => setVerResumen(false)} style={{ backgroundColor: 'transparent', border: 'none', color: '#FF8C00', fontSize: '24px', marginRight: '15px' }}>✕</button>
               <h2 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0 }}>Mi Pedido</h2>
             </div>
 
-            {/* Lista de Productos en el Carrito */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
               {Object.entries(pedido).map(([id, cant]) => {
                 const item = productos.find(p => p.id === parseInt(id));
                 return (
-                  <div key={id} style={{ display: 'flex', gap: '15px', padding: '20px 0', borderBottom: '1px solid #111' }}>
+                  <div key={id} style={{ display: 'flex', gap: '15px', padding: '20px 0', borderBottom: '1px solid #111', position: 'relative' }}>
                     <div style={{ width: '70px', height: '70px', backgroundColor: '#111', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#333' }}>FOTO</div>
                     <div style={{ flex: 1 }}>
                       <h4 style={{ margin: 0, fontSize: '16px' }}>{item?.nombre}</h4>
@@ -168,13 +175,16 @@ export default function Home() {
                         <button onClick={() => modificarCantidadCarrito(id, 1)} style={{ width: '30px', height: '30px', borderRadius: '8px', border: '1px solid #333', backgroundColor: 'transparent', color: '#fff' }}>+</button>
                       </div>
                     </div>
-                    <div style={{ fontWeight: 'bold' }}>C$ {item ? item.precio * cant : 0}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                      {/* LA FAMOSA "X" DE ELIMINAR */}
+                      <button onClick={() => eliminarDelCarrito(id)} style={{ backgroundColor: 'transparent', border: 'none', color: '#777', fontSize: '18px', padding: '0 0 10px 10px' }}>✕</button>
+                      <div style={{ fontWeight: 'bold' }}>C$ {item ? item.precio * cant : 0}</div>
+                    </div>
                   </div>
                 );
               })}
             </div>
 
-            {/* Resumen Final de Pago */}
             <div style={{ padding: '30px', backgroundColor: '#111', borderTopLeftRadius: '30px', borderTopRightRadius: '30px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', color: '#777' }}>
                 <span>Subtotal</span>
@@ -191,7 +201,6 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
-
     </main>
   );
 }
