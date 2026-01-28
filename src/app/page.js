@@ -9,6 +9,9 @@ export default function Home() {
   const [estaAbierto, setEstaAbierto] = useState(false);
   const [productoDetalle, setProductoDetalle] = useState(null);
   const [cantidadTemporal, setCantidadTemporal] = useState(0);
+  
+  // Nuevo estado para el tamaño seleccionado (solo para papas)
+  const [tamanoSeleccionado, setTamanoSeleccionado] = useState('Regular');
 
   useEffect(() => {
     const revisarHorario = () => {
@@ -23,193 +26,174 @@ export default function Home() {
   }, []);
 
   const productos = [
-    // HAMBURGUESAS
     { id: 1, nombre: "La Ultra Fifi", precio: 180, cat: "Hamburguesas", desc: "Carne premium de 1/2 libra, doble queso cheddar fundido, cebolla caramelizada y nuestra famosa salsa secreta.", agotado: false },
     { id: 2, nombre: "La Doble Fifi", precio: 250, cat: "Hamburguesas", desc: "Dos tortas de carne premium, doble porción de tocino ahumado, queso pepper jack y vegetales frescos.", agotado: false },
-    
-    // POLLO
     { id: 3, nombre: "Fifi Wings (6 unidades)", precio: 190, cat: "Pollo", desc: "Alitas crujientes bañadas en tu salsa favorita: BBQ, Búfalo o Miel Mostaza.", agotado: false },
-    { id: 4, nombre: "Nuggets de pollo (10 unidades)", precio: 200, cat: "Pollo", desc: "Pequeños trozos de pollo empanizado, frito y crujiente.", agotado: false },
-    
-    // SALCHIPAPAS
-    { id: 5, nombre: "Salchipapa", precio: 120, cat: "Salchipapas", desc: "Cama de papas fritas crujientes con salchicha parrillera troceada y queso derretido.", agotado: false },
-    
-    // ANTOJOS
-    { id: 6, nombre: "Papas Clásicas", precio: 80, cat: "Antojos", desc: "Clásicas papas fritas con un toque de sal y especias de la casa.", agotado: false },
-    { id: 7, nombre: "Dados de Queso", precio: 60, cat: "Antojos", desc: "Deliciosos Cubos de queso fritos.", agotado: false },
-    { id: 8, nombre: "Papas Waffle", precio: 90, cat: "Antojos", desc: "Papas en corte waffle, súper crujientes por fuera y suaves por dentro.", agotado: false },
-    
-    // BEBIDAS
-    { id: 9, nombre: "Coca-Cola", precio: 30, cat: "Bebidas", desc: "Coca-Cola original en lata de 355ml.", agotado: false },
-    { id: 10, nombre: "Té Frío", precio: 35, cat: "Bebidas", desc: "Té negro con infusión de limón natural.", agotado: false },
+    { id: 4, nombre: "Chicken Tenders", precio: 165, cat: "Pollo", desc: "Tiras de pechuga de pollo empanizadas a mano, acompañadas de papas fritas y salsa ranch.", agotado: false },
+    { id: 5, nombre: "Salchipapa Jumbo", precio: 120, cat: "Salchipapas", desc: "Cama de papas fritas extra crujientes con salchicha parrillera troceada y salsa rosada.", agotado: false },
+    { id: 6, nombre: "Papas Clásicas", precio: 80, cat: "Antojos", desc: "Nuestras clásicas papas fritas con un toque de sal de mar y especias de la casa.", agotado: false, tieneTamanos: true },
+    { id: 7, nombre: "Dados de Queso", precio: 110, cat: "Antojos", desc: "Cubos de queso empanizados y fritos, servidos con una deliciosa mermelada de tomate.", agotado: false },
+    { id: 8, nombre: "Papas Waffle", precio: 95, cat: "Antojos", desc: "Papas en corte waffle, súper crujientes por fuera y suaves por dentro.", agotado: false },
+    { id: 9, nombre: "Coca-Cola", precio: 60, cat: "Bebidas", desc: "Refrescante Coca-Cola original en lata de 355ml.", agotado: false },
+    { id: 10, nombre: "Té Frío", precio: 35, cat: "Bebidas", desc: "Té negro con infusión de limón natural y azúcar de caña.", agotado: false },
   ];
 
   const abrirDetalle = (prod) => {
     setProductoDetalle(prod);
-    setCantidadTemporal(pedido[prod.id] || 0);
+    setTamanoSeleccionado('Regular'); // Resetear a regular al abrir
+    setCantidadTemporal(pedido[`${prod.id}-${tamanoSeleccionado}`] || 1); // Empezar con 1 por defecto
+  };
+
+  const obtenerPrecioActual = () => {
+    if (!productoDetalle) return 0;
+    if (productoDetalle.id === 6) { // Lógica para Papas Clásicas
+      if (tamanoSeleccionado === 'Mediana') return 90;
+      if (tamanoSeleccionado === 'Grande') return 100;
+      return 80; // Regular
+    }
+    return productoDetalle.precio;
   };
 
   const confirmarAlCarrito = () => {
+    const key = productoDetalle.tieneTamanos ? `${productoDetalle.id}-${tamanoSeleccionado}` : productoDetalle.id;
     setPedido(prev => {
       const nuevo = { ...prev };
-      if (cantidadTemporal > 0) nuevo[productoDetalle.id] = cantidadTemporal;
-      else delete nuevo[productoDetalle.id];
+      if (cantidadTemporal > 0) {
+        nuevo[key] = { 
+          id: productoDetalle.id, 
+          cant: cantidadTemporal, 
+          tamano: productoDetalle.tieneTamanos ? tamanoSeleccionado : null,
+          precioUnitario: obtenerPrecioActual()
+        };
+      } else {
+        delete nuevo[key];
+      }
       return nuevo;
     });
     setProductoDetalle(null);
   };
 
-  const modificarCantidadCarrito = (id, delta) => {
+  const modificarCantidadCarrito = (key, delta) => {
     setPedido(prev => {
       const nuevo = { ...prev };
-      const nuevaCant = (nuevo[id] || 0) + delta;
-      if (nuevaCant > 0) nuevo[id] = nuevaCant;
-      else delete nuevo[id];
+      const nuevaCant = nuevo[key].cant + delta;
+      if (nuevaCant > 0) nuevo[key].cant = nuevaCant;
+      else delete nuevo[key];
       if (Object.keys(nuevo).length === 0) setVerResumen(false);
       return nuevo;
     });
   };
 
-  const eliminarDelCarrito = (id) => {
-    setPedido(prev => {
-      const nuevo = { ...prev };
-      delete nuevo[id];
-      if (Object.keys(nuevo).length === 0) setVerResumen(false);
-      return nuevo;
-    });
-  };
-
-  const totalItems = Object.values(pedido).reduce((acc, cant) => acc + cant, 0);
-  const montoTotal = Object.entries(pedido).reduce((acc, [id, cant]) => {
-    const prod = productos.find(p => p.id === parseInt(id));
-    return acc + (prod ? prod.precio * cant : 0);
-  }, 0);
-
-  const filtrados = categoria === 'Todas' ? productos : productos.filter(p => p.cat === categoria);
+  const montoTotal = Object.values(pedido).reduce((acc, item) => acc + (item.precioUnitario * item.cant), 0);
+  const totalItems = Object.values(pedido).reduce((acc, item) => acc + item.cant, 0);
 
   return (
-    <main style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
-      
-      {/* HEADER */}
-      <header style={{ padding: '40px 20px', textAlign: 'center', borderBottom: '1px solid #222', position: 'sticky', top: 0, backgroundColor: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(10px)', zIndex: 50 }}>
+    <main style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh' }}>
+      <header style={{ padding: '40px 20px', textAlign: 'center', borderBottom: '1px solid #222' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0 }}>Hola, bienvenido a</h1>
         <h2 style={{ color: '#FF8C00', fontSize: '38px', fontWeight: '900', fontStyle: 'italic', margin: '5px 0 0 0' }}>Fifi's Food</h2>
       </header>
 
-      {/* HORARIO */}
-      <div style={{ padding: '15px 20px 0 20px' }}>
-        <div style={{ padding: '12px', borderRadius: '15px', backgroundColor: estaAbierto ? 'rgba(40, 167, 69, 0.1)' : 'rgba(255, 68, 68, 0.1)', color: estaAbierto ? '#28a745' : '#ff4444', border: `1px solid ${estaAbierto ? '#28a745' : '#ff4444'}`, textAlign: 'center', fontSize: '13px', fontWeight: 'bold' }}>
-          {estaAbierto ? '● ABIERTO HASTA LAS 11PM' : '○ CERRADO (ABRIMOS A LAS 6PM)'}
-        </div>
-      </div>
-
-      {/* CATEGORÍAS ACTUALIZADAS */}
       <div style={{ display: 'flex', overflowX: 'auto', padding: '20px', gap: '10px' }}>
         {['Todas', 'Hamburguesas', 'Pollo', 'Salchipapas', 'Antojos', 'Bebidas'].map(cat => (
-          <button key={cat} onClick={() => setCategoria(cat)} style={{ padding: '10px 25px', borderRadius: '50px', border: 'none', backgroundColor: categoria === cat ? '#FF8C00' : '#1a1a1a', color: categoria === cat ? '#000' : '#fff', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+          <button key={cat} onClick={() => setCategoria(cat)} style={{ padding: '10px 25px', borderRadius: '50px', border: 'none', backgroundColor: categoria === cat ? '#FF8C00' : '#1a1a1a', color: categoria === cat ? '#000' : '#fff', fontWeight: 'bold' }}>
             {cat}
           </button>
         ))}
       </div>
 
-      {/* LISTA DE MENÚ */}
       <section style={{ padding: '0 20px 120px 20px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {filtrados.map(prod => (
-            <div key={prod.id} onClick={() => !prod.agotado && abrirDetalle(prod)} style={{ backgroundColor: '#111', padding: '20px', borderRadius: '25px', border: '1px solid #222', opacity: prod.agotado ? 0.5 : 1 }}>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>{prod.nombre}</h3>
-              <p style={{ color: '#777', fontSize: '12px', margin: '4px 0 10px 0', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{prod.desc}</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#FF8C00', fontWeight: '900', fontSize: '18px' }}>C$ {prod.precio}</span>
-                {pedido[prod.id] > 0 && <span style={{ backgroundColor: '#FF8C00', color: '#000', padding: '2px 10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px' }}>{pedido[prod.id]} en carrito</span>}
-              </div>
-            </div>
-          ))}
-        </div>
+        {productos.filter(p => categoria === 'Todas' || p.cat === categoria).map(prod => (
+          <div key={prod.id} onClick={() => abrirDetalle(prod)} style={{ backgroundColor: '#111', padding: '20px', borderRadius: '25px', border: '1px solid #222', marginBottom: '15px' }}>
+            <h3 style={{ margin: 0, fontSize: '18px' }}>{prod.nombre}</h3>
+            <p style={{ color: '#777', fontSize: '12px', margin: '5px 0' }}>{prod.desc}</p>
+            <span style={{ color: '#FF8C00', fontWeight: '900' }}>C$ {prod.precio}{prod.tieneTamanos && '+'}</span>
+          </div>
+        ))}
       </section>
 
-      {/* MODAL DETALLE PRODUCTO */}
       <AnimatePresence>
         {productoDetalle && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setProductoDetalle(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 200 }} />
-            <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#111', borderTopLeftRadius: '30px', borderTopRightRadius: '30px', padding: '40px 30px', zIndex: 300 }}>
-              <h2 style={{ fontSize: '28px', fontWeight: '900', margin: '0 0 10px 0' }}>{productoDetalle.nombre}</h2>
-              <p style={{ color: '#aaa', marginBottom: '30px' }}>{productoDetalle.desc}</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-                <span style={{ fontSize: '26px', fontWeight: '900', color: '#FF8C00' }}>C$ {productoDetalle.precio}</span>
-                <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#1a1a1a', borderRadius: '20px', padding: '8px' }}>
-                  <button onClick={() => setCantidadTemporal(Math.max(0, cantidadTemporal - 1))} style={{ backgroundColor: '#333', border: 'none', color: '#fff', width: '40px', height: '40px', borderRadius: '15px' }}>-</button>
-                  <span style={{ margin: '0 20px', fontWeight: 'bold', fontSize: '20px' }}>{cantidadTemporal}</span>
-                  <button onClick={() => setCantidadTemporal(cantidadTemporal + 1)} style={{ backgroundColor: '#FF8C00', border: 'none', width: '40px', height: '40px', borderRadius: '15px' }}>+</button>
+            <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#111', borderTopLeftRadius: '30px', borderTopRightRadius: '30px', padding: '40px 30px', zIndex: 300 }}>
+              <h2 style={{ fontSize: '24px', fontWeight: '900', marginBottom: '10px' }}>{productoDetalle.nombre}</h2>
+              
+              {/* SELECTOR DE TAMAÑO TIPO MCDONALDS */}
+              {productoDetalle.id === 6 && (
+                <div style={{ marginBottom: '30px' }}>
+                  <p style={{ fontSize: '14px', color: '#777', marginBottom: '15px' }}>Selecciona el tamaño:</p>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    {['Regular', 'Mediana', 'Grande'].map(t => (
+                      <button key={t} onClick={() => setTamanoSeleccionado(t)} style={{ flex: 1, padding: '12px', borderRadius: '15px', border: tamanoSeleccionado === t ? '2px solid #FF8C00' : '1px solid #333', backgroundColor: tamanoSeleccionado === t ? 'rgba(255,140,0,0.1)' : 'transparent', color: tamanoSeleccionado === t ? '#FF8C00' : '#fff', fontWeight: 'bold', fontSize: '12px' }}>
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+                <span style={{ fontSize: '26px', fontWeight: '900', color: '#FF8C00' }}>C$ {obtenerPrecioActual()}</span>
+                <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#1a1a1a', borderRadius: '15px', padding: '5px' }}>
+                  <button onClick={() => setCantidadTemporal(Math.max(1, cantidadTemporal - 1))} style={{ width: '35px', height: '35px', border: 'none', backgroundColor: '#333', color: '#fff', borderRadius: '10px' }}>-</button>
+                  <span style={{ margin: '0 15px', fontWeight: 'bold' }}>{cantidadTemporal}</span>
+                  <button onClick={() => setCantidadTemporal(cantidadTemporal + 1)} style={{ width: '35px', height: '35px', border: 'none', backgroundColor: '#FF8C00', borderRadius: '10px' }}>+</button>
                 </div>
               </div>
-              <button onClick={confirmarAlCarrito} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '16px', display: 'flex', justifyContent: 'space-between' }}>
-                <span>{cantidadTemporal > 0 ? 'AÑADIR AL CARRITO' : 'VOLVER AL MENÚ'}</span>
-                {cantidadTemporal > 0 && <span>C$ {productoDetalle.precio * cantidadTemporal}</span>}
+
+              <button onClick={confirmarAlCarrito} style={{ width: '100%', backgroundColor: '#FF8C00', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900', display: 'flex', justifyContent: 'space-between' }}>
+                <span>AÑADIR AL CARRITO</span>
+                <span>C$ {obtenerPrecioActual() * cantidadTemporal}</span>
               </button>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* BOTÓN FLOTANTE */}
-      {totalItems > 0 && !productoDetalle && !verResumen && (
-        <motion.div initial={{ y: 100 }} animate={{ y: 0 }} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', zIndex: 100 }}>
-          <button onClick={() => setVerResumen(true)} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '15px' }}>
-            Ver mi Carrito (C$ {montoTotal} por {totalItems} artículos)
-          </button>
-        </motion.div>
-      )}
-
-      {/* VENTANA DE CARRITO */}
+      {/* CARRITO */}
       <AnimatePresence>
         {verResumen && (
-          <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'tween', duration: 0.3 }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#000', zIndex: 500, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '20px', display: 'flex', alignItems: 'center', borderBottom: '1px solid #222' }}>
-              <button onClick={() => setVerResumen(false)} style={{ backgroundColor: 'transparent', border: 'none', color: '#FF8C00', fontSize: '24px', marginRight: '15px' }}>✕</button>
-              <h2 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0 }}>Mi Pedido</h2>
+          <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#000', zIndex: 500, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '20px', borderBottom: '1px solid #222', display: 'flex', alignItems: 'center' }}>
+              <button onClick={() => setVerResumen(false)} style={{ background: 'none', border: 'none', color: '#FF8C00', fontSize: '20px' }}>✕</button>
+              <h2 style={{ marginLeft: '15px', fontSize: '18px' }}>Mi Pedido</h2>
             </div>
-
             <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-              {Object.entries(pedido).map(([id, cant]) => {
-                const item = productos.find(p => p.id === parseInt(id));
+              {Object.entries(pedido).map(([key, item]) => {
+                const prodOriginal = productos.find(p => p.id === item.id);
                 return (
-                  <div key={id} style={{ display: 'flex', gap: '15px', padding: '20px 0', borderBottom: '1px solid #111', position: 'relative' }}>
-                    <div style={{ width: '70px', height: '70px', backgroundColor: '#111', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#333' }}>FOTO</div>
+                  <div key={key} style={{ display: 'flex', gap: '15px', padding: '15px 0', borderBottom: '1px solid #111' }}>
                     <div style={{ flex: 1 }}>
-                      <h4 style={{ margin: 0, fontSize: '16px' }}>{item?.nombre}</h4>
-                      <p style={{ color: '#777', fontSize: '12px', margin: '4px 0', lineHeight: '1.4', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                        {item?.desc}
-                      </p>
-                      <p style={{ color: '#FF8C00', margin: '5px 0', fontWeight: 'bold' }}>C$ {item?.precio}</p>
+                      <h4 style={{ margin: 0 }}>{prodOriginal?.nombre} {item.tamano && `(${item.tamano})`}</h4>
+                      <p style={{ color: '#777', fontSize: '11px', margin: '4px 0' }}>{prodOriginal?.desc}</p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '10px' }}>
-                        <button onClick={() => modificarCantidadCarrito(id, -1)} style={{ width: '30px', height: '30px', borderRadius: '8px', border: '1px solid #333', backgroundColor: 'transparent', color: '#fff' }}>-</button>
-                        <span style={{ fontWeight: 'bold' }}>{cant}</span>
-                        <button onClick={() => modificarCantidadCarrito(id, 1)} style={{ width: '30px', height: '30px', borderRadius: '8px', border: '1px solid #333', backgroundColor: 'transparent', color: '#fff' }}>+</button>
+                        <button onClick={() => modificarCantidadCarrito(key, -1)} style={{ width: '25px', height: '25px', borderRadius: '5px', border: '1px solid #333', background: 'none', color: '#fff' }}>-</button>
+                        <span>{item.cant}</span>
+                        <button onClick={() => modificarCantidadCarrito(key, 1)} style={{ width: '25px', height: '25px', borderRadius: '5px', border: '1px solid #333', background: 'none', color: '#fff' }}>+</button>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                      <button onClick={() => eliminarDelCarrito(id)} style={{ backgroundColor: 'transparent', border: 'none', color: '#777', fontSize: '18px' }}>✕</button>
-                      <div style={{ fontWeight: 'bold' }}>C$ {item ? item.precio * cant : 0}</div>
-                    </div>
+                    <div style={{ fontWeight: 'bold' }}>C$ {item.precioUnitario * item.cant}</div>
                   </div>
                 );
               })}
             </div>
-
-            <div style={{ padding: '30px', backgroundColor: '#111', borderTopLeftRadius: '30px', borderTopRightRadius: '30px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px', fontSize: '20px', fontWeight: '900' }}>
-                <span>Total a pagar</span>
+            <div style={{ padding: '30px', backgroundColor: '#111' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', fontWeight: '900', marginBottom: '20px' }}>
+                <span>Total</span>
                 <span style={{ color: '#FF8C00' }}>C$ {montoTotal}</span>
               </div>
-              <button style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '16px' }}>
-                CONTINUAR CON EL PEDIDO
-              </button>
+              <button style={{ width: '100%', backgroundColor: '#FF8C00', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900' }}>CONTINUAR</button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {totalItems > 0 && !productoDetalle && !verResumen && (
+        <button onClick={() => setVerResumen(true)} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', backgroundColor: '#FF8C00', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', zIndex: 100 }}>
+          Ver mi Carrito (C$ {montoTotal})
+        </button>
+      )}
     </main>
   );
 }
