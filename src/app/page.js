@@ -59,12 +59,10 @@ export default function Home() {
   return (
     <main style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
       
-      {/* HEADER TIPO MCDONALDS */}
+      {/* HEADER CENTRADO */}
       <header style={{ 
-        padding: '20px', 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
+        padding: '40px 20px', 
+        textAlign: 'center',
         borderBottom: '1px solid #222', 
         position: 'sticky', 
         top: 0, 
@@ -72,26 +70,15 @@ export default function Home() {
         backdropFilter: 'blur(10px)', 
         zIndex: 50 
       }}>
-        <div>
-          <h1 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>Hola, bienvenido a</h1>
-          <h2 style={{ color: '#FF8C00', fontSize: '22px', fontWeight: '900', fontStyle: 'italic', margin: 0 }}>Fifi's Food</h2>
-        </div>
-        <div style={{ 
-          width: '50px', 
-          height: '50px', 
-          borderRadius: '50%', 
-          backgroundColor: '#FF8C00', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          border: '2px solid #333',
-          fontWeight: '900',
-          color: '#000',
-          fontSize: '12px',
-          textAlign: 'center'
-        }}>
-          LOGO
-        </div>
+        <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0, color: '#fff' }}>Hola, bienvenido a</h1>
+        <h2 style={{ 
+          color: '#FF8C00', 
+          fontSize: '38px', 
+          fontWeight: '900', 
+          fontStyle: 'italic', 
+          margin: '5px 0 0 0',
+          lineHeight: '1'
+        }}>Fifi's Food</h2>
       </header>
 
       <div style={{ padding: '15px 20px 0 20px' }}>
@@ -104,7 +91,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* SELECTOR DE CATEGORÍAS */}
       <div style={{ display: 'flex', overflowX: 'auto', padding: '20px', gap: '10px', scrollbarWidth: 'none' }}>
         <style dangerouslySetInnerHTML={{__html: `div::-webkit-scrollbar { display: none; }` }} />
         {categorias.map(cat => (
