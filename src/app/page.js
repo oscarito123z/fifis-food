@@ -23,13 +23,25 @@ export default function Home() {
   }, []);
 
   const productos = [
-    { id: 1, nombre: "La Ultra Fifi", precio: 180, cat: "Hamburguesas", desc: "Carne premium de 1/2 libra, doble queso cheddar fundido, cebolla caramelizada y nuestra famosa salsa secreta en pan artesanal de papa.", agotado: false },
-    { id: 2, nombre: "La Doble Fifi", precio: 250, cat: "Hamburguesas", desc: "Para los verdaderos hambrientos: dos tortas de carne premium, doble porción de tocino ahumado, queso pepper jack y vegetales frescos.", agotado: false },
-    { id: 3, nombre: "Nachos Supremos", precio: 150, cat: "Nachos", desc: "Crujientes tortillas de maíz cubiertas con una generosa capa de queso fundido, frijoles refritos, pico de gallo, jalapeños y crema agria.", agotado: false },
-    { id: 4, nombre: "Salchipapa Jumbo", precio: 120, cat: "Salchipapas", desc: "Cama de papas fritas extra crujientes con salchicha parrillera troceada, bañadas en salsa rosada y queso rallado.", agotado: false },
-    { id: 5, nombre: "Coca-Cola", precio: 60, cat: "Bebidas", desc: "Refrescante Coca-Cola original en lata de 355ml, servida al punto de nieve.", agotado: false },
-    { id: 6, nombre: "Té Frío", precio: 35, cat: "Bebidas", desc: "Té negro con infusión de limón natural y azúcar de caña, servido con mucho hielo.", agotado: false },
-    { id: 7, nombre: "Papas Grandes", precio: 80, cat: "Extras", desc: "Nuestras clásicas papas fritas con un toque de sal de mar y especias de la casa. ¡El acompañamiento perfecto!", agotado: false },
+    // HAMBURGUESAS
+    { id: 1, nombre: "La Ultra Fifi", precio: 180, cat: "Hamburguesas", desc: "Carne premium de 1/2 libra, doble queso cheddar fundido, cebolla caramelizada y nuestra famosa salsa secreta.", agotado: false },
+    { id: 2, nombre: "La Doble Fifi", precio: 250, cat: "Hamburguesas", desc: "Dos tortas de carne premium, doble porción de tocino ahumado, queso pepper jack y vegetales frescos.", agotado: false },
+    
+    // POLLO
+    { id: 3, nombre: "Fifi Wings (6 unidades)", precio: 190, cat: "Pollo", desc: "Alitas crujientes bañadas en tu salsa favorita: BBQ, Búfalo o Miel Mostaza.", agotado: false },
+    { id: 4, nombre: "Chicken Tenders", precio: 165, cat: "Pollo", desc: "Tiras de pechuga de pollo empanizadas a mano, acompañadas de papas fritas y salsa ranch.", agotado: false },
+    
+    // SALCHIPAPAS
+    { id: 5, nombre: "Salchipapa Jumbo", precio: 120, cat: "Salchipapas", desc: "Cama de papas fritas extra crujientes con salchicha parrillera troceada y salsa rosada.", agotado: false },
+    
+    // ANTOJOS
+    { id: 6, nombre: "Papas Clásicas", precio: 80, cat: "Antojos", desc: "Nuestras clásicas papas fritas con un toque de sal de mar y especias de la casa.", agotado: false },
+    { id: 7, nombre: "Dados de Queso", precio: 110, cat: "Antojos", desc: "Cubos de queso empanizados y fritos, servidos con una deliciosa mermelada de tomate.", agotado: false },
+    { id: 8, nombre: "Papas Waffle", precio: 95, cat: "Antojos", desc: "Papas en corte waffle, súper crujientes por fuera y suaves por dentro.", agotado: false },
+    
+    // BEBIDAS
+    { id: 9, nombre: "Coca-Cola", precio: 60, cat: "Bebidas", desc: "Refrescante Coca-Cola original en lata de 355ml.", agotado: false },
+    { id: 10, nombre: "Té Frío", precio: 35, cat: "Bebidas", desc: "Té negro con infusión de limón natural y azúcar de caña.", agotado: false },
   ];
 
   const abrirDetalle = (prod) => {
@@ -78,25 +90,29 @@ export default function Home() {
   return (
     <main style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
       
+      {/* HEADER */}
       <header style={{ padding: '40px 20px', textAlign: 'center', borderBottom: '1px solid #222', position: 'sticky', top: 0, backgroundColor: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(10px)', zIndex: 50 }}>
         <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0 }}>Hola, bienvenido a</h1>
         <h2 style={{ color: '#FF8C00', fontSize: '38px', fontWeight: '900', fontStyle: 'italic', margin: '5px 0 0 0' }}>Fifi's Food</h2>
       </header>
 
+      {/* HORARIO */}
       <div style={{ padding: '15px 20px 0 20px' }}>
         <div style={{ padding: '12px', borderRadius: '15px', backgroundColor: estaAbierto ? 'rgba(40, 167, 69, 0.1)' : 'rgba(255, 68, 68, 0.1)', color: estaAbierto ? '#28a745' : '#ff4444', border: `1px solid ${estaAbierto ? '#28a745' : '#ff4444'}`, textAlign: 'center', fontSize: '13px', fontWeight: 'bold' }}>
           {estaAbierto ? '● ABIERTO HASTA LAS 11PM' : '○ CERRADO (ABRIMOS A LAS 6PM)'}
         </div>
       </div>
 
+      {/* CATEGORÍAS ACTUALIZADAS */}
       <div style={{ display: 'flex', overflowX: 'auto', padding: '20px', gap: '10px' }}>
-        {['Todas', 'Hamburguesas', 'Nachos', 'Salchipapas', 'Bebidas', 'Extras'].map(cat => (
+        {['Todas', 'Hamburguesas', 'Pollo', 'Salchipapas', 'Antojos', 'Bebidas'].map(cat => (
           <button key={cat} onClick={() => setCategoria(cat)} style={{ padding: '10px 25px', borderRadius: '50px', border: 'none', backgroundColor: categoria === cat ? '#FF8C00' : '#1a1a1a', color: categoria === cat ? '#000' : '#fff', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
             {cat}
           </button>
         ))}
       </div>
 
+      {/* LISTA DE MENÚ */}
       <section style={{ padding: '0 20px 120px 20px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {filtrados.map(prod => (
@@ -163,21 +179,9 @@ export default function Home() {
                     <div style={{ width: '70px', height: '70px', backgroundColor: '#111', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#333' }}>FOTO</div>
                     <div style={{ flex: 1 }}>
                       <h4 style={{ margin: 0, fontSize: '16px' }}>{item?.nombre}</h4>
-                      
-                      {/* DESCRIPCIÓN TRUNCADA A 2 LÍNEAS */}
-                      <p style={{ 
-                        color: '#777', 
-                        fontSize: '12px', 
-                        margin: '4px 0', 
-                        lineHeight: '1.4',
-                        overflow: 'hidden',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical'
-                      }}>
+                      <p style={{ color: '#777', fontSize: '12px', margin: '4px 0', lineHeight: '1.4', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {item?.desc}
                       </p>
-
                       <p style={{ color: '#FF8C00', margin: '5px 0', fontWeight: 'bold' }}>C$ {item?.precio}</p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '10px' }}>
                         <button onClick={() => modificarCantidadCarrito(id, -1)} style={{ width: '30px', height: '30px', borderRadius: '8px', border: '1px solid #333', backgroundColor: 'transparent', color: '#fff' }}>-</button>
