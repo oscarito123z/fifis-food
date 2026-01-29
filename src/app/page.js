@@ -4,14 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from './supabase'; // Importamos la conexión
 
 export default function Home() {
-  const [productos, setProductos] = useState([]); // Ahora empieza vacío
+  const [productos, setProductos] = useState([]); 
   const [categoria, setCategoria] = useState('Todas');
   const [pedido, setPedido] = useState({});
   const [verResumen, setVerResumen] = useState(false);
   const [productoDetalle, setProductoDetalle] = useState(null);
   const [cantidadTemporal, setCantidadTemporal] = useState(0);
 
-  // FUNCIÓN PARA CARGAR PRODUCTOS DESDE SUPABASE
   useEffect(() => {
     const cargarProductos = async () => {
       const { data, error } = await supabase.from('productos').select('*');
@@ -46,10 +45,27 @@ export default function Home() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {filtrados.map(prod => (
             <div key={prod.id} onClick={() => !prod.agotado && (setProductoDetalle(prod), setCantidadTemporal(pedido[prod.id] || 0))} style={{ backgroundColor: '#111', padding: '20px', borderRadius: '25px', border: '1px solid #222', opacity: prod.agotado ? 0.5 : 1 }}>
-              <h3 style={{ margin: 0, fontSize: '18px' }}>{prod.nombre}</h3>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-                <span style={{ color: '#FF8C00', fontWeight: '900' }}>C$ {prod.precio}</span>
-                {prod.agotado && <span style={{ color: '#ff4444', fontSize: '12px' }}>AGOTADO</span>}
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>{prod.nombre}</h3>
+              
+              {/* LÍNEA DE DESCRIPCIÓN CON PUNTOS SUSPENSIVOS SI ES MUY LARGA */}
+              <p style={{ 
+                color: '#777', 
+                fontSize: '12px', 
+                margin: '5px 0 10px 0', 
+                display: '-webkit-box', 
+                WebkitLineClamp: '2', 
+                WebkitBoxOrient: 'vertical', 
+                overflow: 'hidden', 
+                textOverflow: 'ellipsis',
+                lineHeight: '1.4'
+              }}>
+                {prod.desc || 'Sin descripción disponible'}
+              </p>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#FF8C00', fontWeight: '900', fontSize: '18px' }}>C$ {prod.precio}</span>
+                {prod.agotado && <span style={{ color: '#ff4444', fontSize: '12px', fontWeight: 'bold' }}>AGOTADO</span>}
+                {pedido[prod.id] > 0 && <span style={{ backgroundColor: '#FF8C00', color: '#000', padding: '2px 10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px' }}>{pedido[prod.id]} en carrito</span>}
               </div>
             </div>
           ))}
@@ -58,12 +74,10 @@ export default function Home() {
 
       {/* BOTÓN FLOTANTE */}
       {totalItems > 0 && (
-        <button onClick={() => setVerResumen(true)} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', backgroundColor: '#FF8C00', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900' }}>
+        <button onClick={() => setVerResumen(true)} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', zIndex: 100 }}>
           Ver mi Carrito (C$ {montoTotal} por {totalItems} artículos)
         </button>
       )}
-
-      {/* El resto de modales (Detalle y Carrito) irían aquí igual que antes... */}
     </main>
   );
 }
