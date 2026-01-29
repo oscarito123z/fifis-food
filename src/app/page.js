@@ -11,7 +11,6 @@ export default function Home() {
   const [productoDetalle, setProductoDetalle] = useState(null);
   const [cantidadTemporal, setCantidadTemporal] = useState(0);
 
-  // Carga inicial de Supabase
   useEffect(() => {
     const cargarProductos = async () => {
       const { data, error } = await supabase.from('productos').select('*');
@@ -52,12 +51,12 @@ export default function Home() {
 
   return (
     <main style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', paddingBottom: '120px' }}>
+      {/* HEADER Y CATEGORÍAS (Igual que antes) */}
       <header style={{ padding: '40px 20px', textAlign: 'center', borderBottom: '1px solid #222' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0 }}>Hola, bienvenido a</h1>
         <h2 style={{ color: '#FF8C00', fontSize: '38px', fontWeight: '900', fontStyle: 'italic', margin: '5px 0 0 0' }}>Fifi's Food</h2>
       </header>
 
-      {/* CATEGORÍAS */}
       <div style={{ display: 'flex', overflowX: 'auto', padding: '20px', gap: '10px' }}>
         {['Todas', 'Hamburguesas', 'Pollo', 'Salchipapas', 'Antojos', 'Bebidas'].map(cat => (
           <button key={cat} onClick={() => setCategoria(cat)} style={{ padding: '10px 25px', borderRadius: '50px', border: 'none', backgroundColor: categoria === cat ? '#FF8C00' : '#1a1a1a', color: categoria === cat ? '#000' : '#fff', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
@@ -82,7 +81,69 @@ export default function Home() {
         </div>
       </section>
 
-      {/* MODAL DETALLE */}
+      {/* VENTANA DE CARRITO ACTUALIZADA */}
+      <AnimatePresence>
+        {verResumen && (
+          <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#000', zIndex: 500, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '20px', borderBottom: '1px solid #222', display: 'flex', alignItems: 'center' }}>
+              <button onClick={() => setVerResumen(false)} style={{ background: 'none', border: 'none', color: '#FF8C00', fontSize: '24px', marginRight: '15px' }}>✕</button>
+              <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>Mi Pedido</h2>
+            </div>
+            
+            <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+              {Object.entries(pedido).map(([id, cant]) => {
+                const item = productos.find(p => p.id === parseInt(id));
+                return (
+                  <div key={id} style={{ display: 'flex', gap: '15px', padding: '20px 0', borderBottom: '1px solid #111' }}>
+                    {/* FOTO DEL PRODUCTO */}
+                    <div style={{ width: '80px', height: '80px', backgroundColor: '#111', borderRadius: '15px', border: '1px solid #222', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#333', flexShrink: 0 }}>
+                      FOTO
+                    </div>
+                    
+                    {/* INFO DEL PRODUCTO */}
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ margin: 0, fontSize: '16px' }}>{item?.nombre}</h4>
+                      <p style={{ color: '#777', fontSize: '11px', margin: '4px 0', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {item?.desc}
+                      </p>
+                      <p style={{ color: '#FF8C00', margin: '5px 0', fontWeight: 'bold' }}>C$ {item?.precio}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '8px' }}>
+                        <button onClick={() => modificarCantidadCarrito(id, -1)} style={{ width: '28px', height: '28px', borderRadius: '8px', border: '1px solid #333', background: 'none', color: '#fff' }}>-</button>
+                        <span style={{ fontWeight: 'bold' }}>{cant}</span>
+                        <button onClick={() => modificarCantidadCarrito(id, 1)} style={{ width: '28px', height: '28px', borderRadius: '8px', border: '1px solid #333', background: 'none', color: '#fff' }}>+</button>
+                      </div>
+                    </div>
+                    
+                    {/* PRECIO TOTAL POR LÍNEA */}
+                    <div style={{ fontWeight: 'bold', alignSelf: 'center' }}>
+                      C$ {item ? item.precio * cant : 0}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{ padding: '30px', backgroundColor: '#111', borderTopLeftRadius: '30px', borderTopRightRadius: '30px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px', fontSize: '20px', fontWeight: '900' }}>
+                <span>Total a pagar</span>
+                <span style={{ color: '#FF8C00' }}>C$ {montoTotal}</span>
+              </div>
+              <button style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900', fontSize: '16px' }}>
+                CONTINUAR CON EL PEDIDO
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* BOTÓN FLOTANTE Y MODAL DETALLE (Igual que antes) */}
+      {totalItems > 0 && !productoDetalle && !verResumen && (
+        <button onClick={() => setVerResumen(true)} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', zIndex: 100 }}>
+          Ver mi Carrito (C$ {montoTotal})
+        </button>
+      )}
+
+      {/* MODAL DETALLE (Simplificado aquí por espacio, pero mantenlo en tu código) */}
       <AnimatePresence>
         {productoDetalle && (
           <>
@@ -104,51 +165,6 @@ export default function Home() {
               </button>
             </motion.div>
           </>
-        )}
-      </AnimatePresence>
-
-      {/* BOTÓN FLOTANTE CARRITO */}
-      {totalItems > 0 && !productoDetalle && !verResumen && (
-        <button onClick={() => setVerResumen(true)} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', zIndex: 100 }}>
-          Ver mi Carrito (C$ {montoTotal})
-        </button>
-      )}
-
-      {/* VENTANA DE CARRITO */}
-      <AnimatePresence>
-        {verResumen && (
-          <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#000', zIndex: 500, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '20px', borderBottom: '1px solid #222', display: 'flex', alignItems: 'center' }}>
-              <button onClick={() => setVerResumen(false)} style={{ background: 'none', border: 'none', color: '#FF8C00', fontSize: '24px', marginRight: '15px' }}>✕</button>
-              <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>Mi Pedido</h2>
-            </div>
-            <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-              {Object.entries(pedido).map(([id, cant]) => {
-                const item = productos.find(p => p.id === parseInt(id));
-                return (
-                  <div key={id} style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 0', borderBottom: '1px solid #111' }}>
-                    <div>
-                      <h4 style={{ margin: 0 }}>{item?.nombre}</h4>
-                      <p style={{ color: '#FF8C00', fontSize: '14px', margin: '5px 0' }}>C$ {item?.precio}</p>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <button onClick={() => modificarCantidadCarrito(id, -1)} style={{ width: '25px', height: '25px', borderRadius: '5px', border: '1px solid #333', background: 'none', color: '#fff' }}>-</button>
-                        <span>{cant}</span>
-                        <button onClick={() => modificarCantidadCarrito(id, 1)} style={{ width: '25px', height: '25px', borderRadius: '5px', border: '1px solid #333', background: 'none', color: '#fff' }}>+</button>
-                      </div>
-                    </div>
-                    <div style={{ fontWeight: 'bold' }}>C$ {item ? item.precio * cant : 0}</div>
-                  </div>
-                );
-              })}
-            </div>
-            <div style={{ padding: '30px', backgroundColor: '#111' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '20px', fontWeight: '900' }}>
-                <span>Total</span>
-                <span style={{ color: '#FF8C00' }}>C$ {montoTotal}</span>
-              </div>
-              <button style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900' }}>CONTINUAR</button>
-            </div>
-          </motion.div>
         )}
       </AnimatePresence>
     </main>
