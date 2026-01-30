@@ -11,25 +11,34 @@ export default function Home() {
   const [verResumen, setVerResumen] = useState(false);
   const [productoDetalle, setProductoDetalle] = useState(null);
   const [cantidadTemporal, setCantidadTemporal] = useState(0);
+  
+  // ESTADOS DE ESTADO DEL LOCAL
   const [estaAbierto, setEstaAbierto] = useState(false);
   const [pasoFinal, setPasoFinal] = useState(false);
 
   useEffect(() => {
-    const cargarProductos = async () => {
-      const { data, error } = await supabase.from('productos').select('*');
-      if (error) console.log('Error cargando:', error);
-      else setProductos(data);
-    };
+    const cargarDatosIniciales = async () => {
+      // 1. Cargar Productos
+      const { data: prodData } = await supabase.from('productos').select('*');
+      if (prodData) setProductos(prodData);
 
-    const revisarHorario = () => {
+      // 2. Cargar Ajuste Manual del Dueño
+      const { data: ajustData } = await supabase.from('ajustes').select('abierto_manual').eq('id', 1).single();
+      
+      // 3. Revisar Horario (5 PM a 11 PM)
       const ahora = new Date();
       const hora = ahora.getHours();
-      if (hora >= 17 && hora < 23) setEstaAbierto(true);
-      else setEstaAbierto(false);
+      const horarioCorrecto = (hora >= 17 && hora < 23);
+
+      // 4. LÓGICA FINAL: Abierto solo si el horario es correcto Y el dueño no cerró manual
+      if (ajustData && ajustData.abierto_manual && horarioCorrecto) {
+        setEstaAbierto(true);
+      } else {
+        setEstaAbierto(false);
+      }
     };
 
-    cargarProductos();
-    revisarHorario();
+    cargarDatosIniciales();
   }, []);
 
   const montoTotal = Object.entries(pedido).reduce((acc, [id, cant]) => {
@@ -64,7 +73,16 @@ export default function Home() {
         <h2 style={{ color: '#FF8C00', fontSize: '38px', fontWeight: '900', fontStyle: 'italic', margin: '5px 0 0 0' }}>Fifi's Food</h2>
       </header>
 
-      <div style={{ backgroundColor: estaAbierto ? '#00c853' : '#d50000', color: '#fff', textAlign: 'center', padding: '8px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+      {/* BANNER DINÁMICO CONECTADO AL ADMIN */}
+      <div style={{ 
+        backgroundColor: estaAbierto ? '#00c853' : '#d50000', 
+        color: '#fff', 
+        textAlign: 'center', 
+        padding: '8px', 
+        fontSize: '12px', 
+        fontWeight: 'bold', 
+        textTransform: 'uppercase' 
+      }}>
         {estaAbierto ? '● Abiertos ahora en Managua' : '○ Cerrado por ahora'}
       </div>
 
@@ -122,7 +140,6 @@ export default function Home() {
                       </div>
                       <div style={{ flex: 1 }}>
                         <h4 style={{ margin: 0, fontSize: '16px' }}>{item?.nombre}</h4>
-                        <p style={{ color: '#777', fontSize: '11px', margin: '2px 0' }}>{item?.desc}</p>
                         <p style={{ color: '#FF8C00', margin: '4px 0', fontWeight: 'bold' }}>C$ {item?.precio}</p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                           <button onClick={() => modificarCantidadCarrito(id, -1)} style={{ width: '28px', height: '28px', borderRadius: '8px', border: '1px solid #333', background: 'none', color: '#fff' }}>-</button>
@@ -164,12 +181,14 @@ export default function Home() {
         )}
       </AnimatePresence>
 
+      {/* BOTÓN FLOTANTE DEL CARRITO */}
       {Object.values(pedido).length > 0 && !productoDetalle && !verResumen && (
         <button onClick={() => setVerResumen(true)} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', zIndex: 100 }}>
           Ver Carrito (C$ {montoTotal})
         </button>
       )}
 
+      {/* MODAL DETALLE DE PRODUCTO */}
       <AnimatePresence>
         {productoDetalle && (
           <>
