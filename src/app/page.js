@@ -97,6 +97,7 @@ export default function Home() {
                 <p style={{ color: '#777', fontSize: '12px', margin: '4px 0 10px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{prod.desc}</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: '#FF8C00', fontWeight: '900', fontSize: '18px' }}>C$ {prod.precio}</span>
+                  {pedido[prod.id] > 0 && <span style={{ backgroundColor: '#FF8C00', color: '#000', padding: '2px 10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px' }}>{pedido[prod.id]}</span>}
                 </div>
               </div>
             </div>
@@ -123,6 +124,10 @@ export default function Home() {
                       </div>
                       <div style={{ flex: 1 }}>
                         <h4 style={{ margin: 0, fontSize: '16px' }}>{item?.nombre}</h4>
+                        {/* AQUÍ ESTÁ LA DESCRIPCIÓN DE NUEVO */}
+                        <p style={{ color: '#777', fontSize: '11px', margin: '2px 0', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {item?.desc}
+                        </p>
                         <p style={{ color: '#FF8C00', margin: '4px 0', fontWeight: 'bold' }}>C$ {item?.precio}</p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                           <button onClick={() => modificarCantidadCarrito(id, -1)} style={{ width: '28px', height: '28px', borderRadius: '8px', border: '1px solid #333', background: 'none', color: '#fff' }}>-</button>
@@ -136,9 +141,9 @@ export default function Home() {
                 })
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', justifyContent: 'center', height: '100%' }}>
-                   <button style={{ width: '100%', backgroundColor: '#111', color: '#fff', padding: '30px', borderRadius: '25px', border: '2px solid #222', fontSize: '20px', fontWeight: 'bold' }}>🥡 Retirar en local</button>
-                   <button style={{ width: '100%', backgroundColor: '#111', color: '#fff', padding: '30px', borderRadius: '25px', border: '2px solid #222', fontSize: '20px', fontWeight: 'bold' }}>🛵 Pedir Delivery</button>
-                   <button onClick={() => setPasoFinal(false)} style={{ width: '100%', backgroundColor: '#050505', color: '#777', padding: '25px', borderRadius: '25px', border: '1px dashed #333', fontSize: '18px', fontWeight: 'bold' }}>↩️ Volver al carrito</button>
+                   <button style={{ width: '100%', backgroundColor: '#111', color: '#fff', padding: '30px', borderRadius: '25px', border: '2px solid #222', fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>🥡 Retirar en local</button>
+                   <button style={{ width: '100%', backgroundColor: '#111', color: '#fff', padding: '30px', borderRadius: '25px', border: '2px solid #222', fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>🛵 Pedir Delivery</button>
+                   <button onClick={() => setPasoFinal(false)} style={{ width: '100%', backgroundColor: '#050505', color: '#777', padding: '25px', borderRadius: '25px', border: '1px dashed #333', fontSize: '18px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', marginTop: '10px' }}>↩️ Volver al carrito</button>
                 </div>
               )}
             </div>
@@ -170,7 +175,6 @@ export default function Home() {
         </button>
       )}
 
-      {/* MODAL DETALLE PRODUCTO - BLOQUEADO SI CERRADO */}
       <AnimatePresence>
         {productoDetalle && estaAbierto && (
           <>
