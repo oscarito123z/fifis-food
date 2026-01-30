@@ -6,7 +6,7 @@ import { supabase } from './supabase';
 export default function Home() {
   const [productos, setProductos] = useState([]); 
   const [categoria, setCategoria] = useState('Todas');
-  const [busqueda, setBusqueda] = useState(''); // <--- NUEVO: Estado para el buscador
+  const [busqueda, setBusqueda] = useState('');
   const [pedido, setPedido] = useState({});
   const [verResumen, setVerResumen] = useState(false);
   const [productoDetalle, setProductoDetalle] = useState(null);
@@ -23,6 +23,7 @@ export default function Home() {
     const revisarHorario = () => {
       const ahora = new Date();
       const hora = ahora.getHours();
+      // Abierto de 5 PM a 11 PM
       if (hora >= 17 && hora < 23) setEstaAbierto(true);
       else setEstaAbierto(false);
     };
@@ -58,7 +59,6 @@ export default function Home() {
     });
   };
 
-  // LÓGICA DE FILTRADO ACTUALIZADA
   const filtrados = productos.filter(p => {
     const coincideCategoria = categoria === 'Todas' || p.categoria === categoria;
     const coincideBusqueda = p.nombre.toLowerCase().includes(busqueda.toLowerCase());
@@ -76,12 +76,12 @@ export default function Home() {
         {estaAbierto ? '● Abiertos ahora en Managua' : '○ Cerrado por ahora'}
       </div>
 
-      {/* BUSCADOR */}
+      {/* BUSCADOR CORREGIDO */}
       <div style={{ padding: '20px 20px 0 20px' }}>
         <div style={{ position: 'relative' }}>
           <input 
             type="text" 
-            placeholder="¿Qué se te antoja buscar?" 
+            placeholder="¿Qué se te antoja hoy?" 
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             style={{ width: '100%', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '15px', padding: '15px 15px 15px 45px', color: '#fff', outline: 'none' }}
@@ -100,7 +100,7 @@ export default function Home() {
 
       <section style={{ padding: '0 20px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {filtrados.length > 0 ? filtrados.map(prod => (
+          {filtrados.map(prod => (
             <div key={prod.id} onClick={() => !prod.agotado && (setProductoDetalle(prod), setCantidadTemporal(pedido[prod.id] || 1))} style={{ backgroundColor: '#111', padding: '20px', borderRadius: '25px', border: '1px solid #222', opacity: prod.agotado ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '15px' }}>
               {prod.imagen && (
                 <div style={{ width: '90px', height: '90px', borderRadius: '15px', overflow: 'hidden', flexShrink: 0 }}>
@@ -116,15 +116,10 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          )) : (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#555' }}>
-              No encontramos nada con ese nombre... 😕
-            </div>
-          )}
+          ))}
         </div>
       </section>
 
-      {/* BOTÓN CARRITO Y MODALES (Mantenelos igual que antes) */}
       <AnimatePresence>
         {verResumen && (
           <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#000', zIndex: 500, display: 'flex', flexDirection: 'column' }}>
@@ -141,8 +136,13 @@ export default function Home() {
                     <div style={{ width: '70px', height: '70px', borderRadius: '12px', overflow: 'hidden', backgroundColor: '#111', flexShrink: 0 }}>
                       {item?.imagen ? <img src={item.imagen} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#333' }}>Fifi's</div>}
                     </div>
+                    
                     <div style={{ flex: 1 }}>
                       <h4 style={{ margin: 0, fontSize: '16px' }}>{item?.nombre}</h4>
+                      {/* DESCRIPCIÓN REINCORPORADA EN EL CARRITO */}
+                      <p style={{ color: '#777', fontSize: '11px', margin: '2px 0', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {item?.desc}
+                      </p>
                       <p style={{ color: '#FF8C00', margin: '4px 0', fontWeight: 'bold' }}>C$ {item?.precio}</p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                         <button onClick={() => modificarCantidadCarrito(id, -1)} style={{ width: '28px', height: '28px', borderRadius: '8px', border: '1px solid #333', background: 'none', color: '#fff' }}>-</button>
@@ -173,7 +173,6 @@ export default function Home() {
         </button>
       )}
 
-      {/* MODAL DETALLE (Mantenlo igual) */}
       <AnimatePresence>
         {productoDetalle && (
           <>
