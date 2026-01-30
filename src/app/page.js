@@ -10,6 +10,7 @@ export default function Home() {
   const [verResumen, setVerResumen] = useState(false);
   const [productoDetalle, setProductoDetalle] = useState(null);
   const [cantidadTemporal, setCantidadTemporal] = useState(0);
+  const [estaAbierto, setEstaAbierto] = useState(false);
 
   useEffect(() => {
     const cargarProductos = async () => {
@@ -17,7 +18,21 @@ export default function Home() {
       if (error) console.log('Error cargando:', error);
       else setProductos(data);
     };
+
+    // Lógica del Banner de Estado (Ejemplo: Abierto de 5pm a 11pm)
+    const revisarHorario = () => {
+      const ahora = new Date();
+      const hora = ahora.getHours();
+      // Configurá aquí tus horas (ejemplo: 17 es 5pm, 23 es 11pm)
+      if (hora >= 17 && hora < 23) {
+        setEstaAbierto(true);
+      } else {
+        setEstaAbierto(false);
+      }
+    };
+
     cargarProductos();
+    revisarHorario();
   }, []);
 
   const totalItems = Object.values(pedido).reduce((acc, cant) => acc + cant, 0);
@@ -56,6 +71,20 @@ export default function Home() {
         <h2 style={{ color: '#FF8C00', fontSize: '38px', fontWeight: '900', fontStyle: 'italic', margin: '5px 0 0 0' }}>Fifi's Food</h2>
       </header>
 
+      {/* BANNER DE ESTADO DINÁMICO */}
+      <div style={{ 
+        backgroundColor: estaAbierto ? '#00c853' : '#d50000', 
+        color: '#fff', 
+        textAlign: 'center', 
+        padding: '8px', 
+        fontSize: '14px', 
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        letterSpacing: '1px'
+      }}>
+        {estaAbierto ? '● Abiertos ahora en Managua' : '○ Cerrado por ahora - Abrimos a las 5 PM'}
+      </div>
+
       <div style={{ display: 'flex', overflowX: 'auto', padding: '20px', gap: '10px' }}>
         {['Todas', 'Hamburguesas', 'Pollo', 'Salchipapas', 'Antojos', 'Bebidas'].map(cat => (
           <button key={cat} onClick={() => setCategoria(cat)} style={{ padding: '10px 25px', borderRadius: '50px', border: 'none', backgroundColor: categoria === cat ? '#FF8C00' : '#1a1a1a', color: categoria === cat ? '#000' : '#fff', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
@@ -91,7 +120,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- EL RESTO DEL CÓDIGO (CARRITO Y MODALES) SE MANTIENE IGUAL --- */}
+      {/* CARRITO Y MODALES (Igual que antes) */}
       <AnimatePresence>
         {verResumen && (
           <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#000', zIndex: 500, display: 'flex', flexDirection: 'column' }}>
