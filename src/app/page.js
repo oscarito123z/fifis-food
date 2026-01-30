@@ -68,6 +68,8 @@ export default function Home() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {filtrados.map(prod => (
             <div key={prod.id} onClick={() => !prod.agotado && (setProductoDetalle(prod), setCantidadTemporal(pedido[prod.id] || 1))} style={{ backgroundColor: '#111', padding: '20px', borderRadius: '25px', border: '1px solid #222', opacity: prod.agotado ? 0.5 : 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '15px' }}>
+              
+              {/* INFO A LA IZQUIERDA */}
               <div style={{ flex: 1 }}>
                 <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>{prod.nombre}</h3>
                 <p style={{ color: '#777', fontSize: '12px', margin: '4px 0 10px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{prod.desc}</p>
@@ -76,16 +78,20 @@ export default function Home() {
                   {pedido[prod.id] > 0 && <span style={{ backgroundColor: '#FF8C00', color: '#000', padding: '2px 10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px' }}>{pedido[prod.id]}</span>}
                 </div>
               </div>
+
+              {/* FOTO A LA DERECHA */}
               {prod.imagen && (
                 <div style={{ width: '90px', height: '90px', borderRadius: '15px', overflow: 'hidden', flexShrink: 0 }}>
                   <img src={prod.imagen} alt={prod.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
               )}
+              
             </div>
           ))}
         </div>
       </section>
 
+      {/* CARRITO Y MODALES */}
       <AnimatePresence>
         {verResumen && (
           <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#000', zIndex: 500, display: 'flex', flexDirection: 'column' }}>
