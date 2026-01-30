@@ -12,8 +12,6 @@ export default function Home() {
   const [productoDetalle, setProductoDetalle] = useState(null);
   const [cantidadTemporal, setCantidadTemporal] = useState(0);
   const [estaAbierto, setEstaAbierto] = useState(false);
-  
-  // NUEVO: Estado para saber si mostrar el carrito o las opciones de entrega
   const [pasoFinal, setPasoFinal] = useState(false);
 
   useEffect(() => {
@@ -115,7 +113,6 @@ export default function Home() {
             
             <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
               {!pasoFinal ? (
-                // PASO 1: LISTA DEL CARRITO
                 Object.entries(pedido).map(([id, cant]) => {
                   const item = productos.find(p => p.id === parseInt(id));
                   return (
@@ -138,15 +135,16 @@ export default function Home() {
                   );
                 })
               ) : (
-                // PASO 2: LAS DOS OPCIONES QUE PEDISTE
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', justifyContent: 'center', height: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', justifyContent: 'center', height: '100%' }}>
                    <button style={{ width: '100%', backgroundColor: '#111', color: '#fff', padding: '30px', borderRadius: '25px', border: '2px solid #222', fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
-                    🥡 Retirar
+                    🥡 Retirar en local
                    </button>
                    <button style={{ width: '100%', backgroundColor: '#111', color: '#fff', padding: '30px', borderRadius: '25px', border: '2px solid #222', fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
-                    🛵 Delivery
+                    🛵 Pedir Delivery
                    </button>
-                   <button onClick={() => setPasoFinal(false)} style={{ background: 'none', border: 'none', color: '#777', marginTop: '20px', textDecoration: 'underline' }}>Volver a revisar mi pedido</button>
+                   <button onClick={() => setPasoFinal(false)} style={{ width: '100%', backgroundColor: '#050505', color: '#777', padding: '25px', borderRadius: '25px', border: '1px dashed #333', fontSize: '18px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', marginTop: '10px' }}>
+                    ↩️ Volver al carrito
+                   </button>
                 </div>
               )}
             </div>
@@ -156,8 +154,6 @@ export default function Home() {
                 <span>Total</span>
                 <span style={{ color: '#FF8C00' }}>C$ {montoTotal}</span>
               </div>
-              
-              {/* Solo mostramos el botón CONTINUAR si no hemos elegido método aún */}
               {!pasoFinal && (
                 <button onClick={() => setPasoFinal(true)} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900' }}>
                   CONTINUAR
@@ -168,14 +164,12 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* BOTÓN FLOTANTE DEL CARRITO */}
       {Object.values(pedido).length > 0 && !productoDetalle && !verResumen && (
         <button onClick={() => setVerResumen(true)} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', zIndex: 100 }}>
           Ver Carrito (C$ {montoTotal})
         </button>
       )}
 
-      {/* MODAL DETALLE DE PRODUCTO */}
       <AnimatePresence>
         {productoDetalle && (
           <>
