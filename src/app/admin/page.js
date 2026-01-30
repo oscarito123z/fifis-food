@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function AdminPanel() {
   const [productos, setProductos] = useState([]);
@@ -49,17 +49,12 @@ export default function AdminPanel() {
     }
   };
 
-  // --- LÓGICA DE CATEGORÍA CORREGIDA ---
   const toggleCategoriaCompleta = async (cat) => {
-    // Verificamos si hay al menos un producto de la categoría que NO esté agotado
     const productosCat = productos.filter(p => p.categoria === cat);
     const algunoActivo = productosCat.some(p => !p.agotado);
-    
-    // Si hay alguno activo, apagamos todos. Si todos están apagados, encendemos todos.
-    const nuevoEstado = algunoActivo ? true : false; // true = Agotado
+    const nuevoEstado = algunoActivo; 
 
     const { error } = await supabase.from('productos').update({ agotado: nuevoEstado }).eq('categoria', cat);
-    
     if (!error) {
       setProductos(productos.map(p => p.categoria === cat ? { ...p, agotado: nuevoEstado } : p));
       setMensaje(`${cat}: ${nuevoEstado ? '🔴 APAGADA' : '🟢 ENCENDIDA'}`);
@@ -101,13 +96,15 @@ export default function AdminPanel() {
     }
   };
 
+  const ventaTotalPeriodo = datosGrafica.reduce((acc, curr) => acc + curr.ventas, 0);
+
   if (!autorizado) {
     return (
       <main style={{ backgroundColor: '#000', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ backgroundColor: '#111', padding: '40px', borderRadius: '30px', border: '1px solid #222', textAlign: 'center' }}>
           <h2 style={{ color: '#FF8C00', marginBottom: '20px' }}>ADMIN FIFI'S</h2>
-          <form onSubmit={(e) => { e.preventDefault(); if (password === PASSWORD_CORRECTA) setAutorizado(true); else alert("Error"); }}>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: '100%', padding: '15px', borderRadius: '15px', backgroundColor: '#1a1a1a', color: '#fff', border: '1px solid #333' }} />
+          <form onSubmit={(e) => { e.preventDefault(); if (password === PASSWORD_CORRECTA) setAutorizado(true); }}>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: '100%', padding: '15px', borderRadius: '15px', backgroundColor: '#1a1a1a', color: '#fff', border: '1px solid #333' }} placeholder="Código" />
             <button type="submit" style={{ width: '100%', marginTop: '10px', padding: '15px', borderRadius: '15px', backgroundColor: '#FF8C00', fontWeight: 'bold' }}>ENTRAR</button>
           </form>
         </div>
@@ -118,49 +115,57 @@ export default function AdminPanel() {
   return (
     <div style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', padding: '20px', paddingBottom: '100px' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <h1 style={{ color: '#FF8C00', fontSize: '18px', fontWeight: '900' }}>FIFI'S DASHBOARD</h1>
-        <button onClick={() => setAutorizado(false)} style={{ color: '#555', border: 'none', background: 'none' }}>Cerrar</button>
+        <h1 style={{ color: '#FF8C00', fontSize: '18px', fontWeight: '900' }}>FIFI'S CONTROL HUB</h1>
+        <button onClick={() => setAutorizado(false)} style={{ color: '#555', border: 'none', background: 'none' }}>Salir</button>
       </header>
 
-      {/* GRÁFICA */}
-      <div style={{ backgroundColor: '#111', padding: '15px', borderRadius: '25px', marginBottom: '20px', border: '1px solid #222' }}>
-         <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
-            {['dia', 'semana', 'mes'].map(t => (
-              <button key={t} onClick={() => setFiltroTiempo(t)} style={{ flex: 1, padding: '8px', borderRadius: '10px', border: 'none', backgroundColor: filtroTiempo === t ? '#FF8C00' : '#222', color: filtroTiempo === t ? '#000' : '#fff', fontWeight: 'bold', fontSize: '10px' }}>{t.toUpperCase()}</button>
-            ))}
-         </div>
-         <div style={{ width: '100%', height: 150 }}>
-            <ResponsiveContainer>
+      {/* DASHBOARD COMPLETO RE-ESTABLECIDO */}
+      <div style={{ backgroundColor: '#111', padding: '20px', borderRadius: '25px', border: '1px solid #222', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+          {['dia', 'semana', 'mes'].map(t => (
+            <button key={t} onClick={() => setFiltroTiempo(t)} style={{ flex: 1, padding: '10px', borderRadius: '12px', border: 'none', backgroundColor: filtroTiempo === t ? '#FF8C00' : '#222', color: filtroTiempo === t ? '#000' : '#fff', fontWeight: 'bold', fontSize: '11px' }}>{t.toUpperCase()}</button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '15px' }}>
+          <div>
+            <p style={{ fontSize: '12px', color: '#777', margin: 0 }}>Venta Total ({filtroTiempo})</p>
+            <h3 style={{ color: '#00c853', margin: 0, fontSize: '22px' }}>C$ {ventaTotalPeriodo}</h3>
+          </div>
+          <div style={{ display: 'flex', gap: '5px' }}>
+            <button onClick={() => setTipoGrafica('lineas')} style={{ background: tipoGrafica === 'lineas' ? '#FF8C00' : '#222', border: 'none', borderRadius: '8px', padding: '8px 12px', color: tipoGrafica === 'lineas' ? '#000' : '#fff' }}>📈</button>
+            <button onClick={() => setTipoGrafica('barras')} style={{ background: tipoGrafica === 'barras' ? '#FF8C00' : '#222', border: 'none', borderRadius: '8px', padding: '8px 12px', color: tipoGrafica === 'barras' ? '#000' : '#fff' }}>📊</button>
+          </div>
+        </div>
+
+        <div style={{ width: '100%', height: 180 }}>
+          <ResponsiveContainer>
+            {tipoGrafica === 'lineas' ? (
               <LineChart data={datosGrafica}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#222" />
                 <XAxis dataKey="name" stroke="#555" fontSize={10} />
                 <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333' }} />
                 <Line type="monotone" dataKey="ventas" stroke="#FF8C00" strokeWidth={3} dot={false} />
               </LineChart>
-            </ResponsiveContainer>
-         </div>
+            ) : (
+              <BarChart data={datosGrafica}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#222" />
+                <XAxis dataKey="name" stroke="#555" fontSize={10} />
+                <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333' }} />
+                <Bar dataKey="ventas" fill="#FF8C00" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            )}
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      {/* SELECTOR DE CATEGORÍA (SWITCH INTELIGENTE) */}
-      <h3 style={{ fontSize: '13px', color: '#777', marginBottom: '10px' }}>Control de Categorías (Toque para ON/OFF)</h3>
+      {/* CATEGORÍAS */}
+      <h3 style={{ fontSize: '13px', color: '#777', marginBottom: '10px' }}>Control de Categorías</h3>
       <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '20px', paddingBottom: '10px' }}>
         {categorias.map(cat => {
           const estaApagada = productos.filter(p => p.categoria === cat).every(p => p.agotado);
           return (
-            <button 
-              key={cat} 
-              onClick={() => toggleCategoriaCompleta(cat)}
-              style={{ 
-                backgroundColor: estaApagada ? '#330000' : '#003300', 
-                border: `1px solid ${estaApagada ? '#ff4444' : '#00c853'}`, 
-                color: '#fff', 
-                padding: '10px 15px', 
-                borderRadius: '15px', 
-                whiteSpace: 'nowrap',
-                fontSize: '11px',
-                fontWeight: 'bold'
-              }}
-            >
+            <button key={cat} onClick={() => toggleCategoriaCompleta(cat)} style={{ backgroundColor: estaApagada ? '#330000' : '#003300', border: `1px solid ${estaApagada ? '#ff4444' : '#00c853'}`, color: '#fff', padding: '10px 15px', borderRadius: '15px', whiteSpace: 'nowrap', fontSize: '11px', fontWeight: 'bold' }}>
               {estaApagada ? `❌ ${cat}` : `✅ ${cat}`}
             </button>
           );
@@ -173,9 +178,10 @@ export default function AdminPanel() {
 
       {mensaje && <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#FF8C00', color: '#000', padding: '10px 20px', borderRadius: '15px', fontWeight: 'bold', zIndex: 2000 }}>{mensaje}</div>}
 
+      {/* LISTA DE PRODUCTOS */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {productos.map(p => (
-          <div key={p.id} style={{ backgroundColor: '#111', padding: '15px', borderRadius: '20px', border: `1px solid ${p.agotado ? '#ff4444' : '#222'}` }}>
+          <div key={p.id} style={{ backgroundColor: '#111', padding: '15px', borderRadius: '25px', border: `1px solid ${p.agotado ? '#ff4444' : '#222'}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <img src={p.imagen} style={{ width: '45px', height: '45px', borderRadius: '10px', objectFit: 'cover', opacity: p.agotado ? 0.3 : 1 }} />
