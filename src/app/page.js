@@ -11,33 +11,26 @@ export default function Home() {
   const [verResumen, setVerResumen] = useState(false);
   const [productoDetalle, setProductoDetalle] = useState(null);
   const [cantidadTemporal, setCantidadTemporal] = useState(0);
-  
-  // ESTADOS DE ESTADO DEL LOCAL
   const [estaAbierto, setEstaAbierto] = useState(false);
   const [pasoFinal, setPasoFinal] = useState(false);
 
   useEffect(() => {
     const cargarDatosIniciales = async () => {
-      // 1. Cargar Productos
       const { data: prodData } = await supabase.from('productos').select('*');
       if (prodData) setProductos(prodData);
 
-      // 2. Cargar Ajuste Manual del Dueño
       const { data: ajustData } = await supabase.from('ajustes').select('abierto_manual').eq('id', 1).single();
       
-      // 3. Revisar Horario (5 PM a 11 PM)
       const ahora = new Date();
       const hora = ahora.getHours();
       const horarioCorrecto = (hora >= 17 && hora < 23);
 
-      // 4. LÓGICA FINAL: Abierto solo si el horario es correcto Y el dueño no cerró manual
       if (ajustData && ajustData.abierto_manual && horarioCorrecto) {
         setEstaAbierto(true);
       } else {
         setEstaAbierto(false);
       }
     };
-
     cargarDatosIniciales();
   }, []);
 
@@ -73,16 +66,7 @@ export default function Home() {
         <h2 style={{ color: '#FF8C00', fontSize: '38px', fontWeight: '900', fontStyle: 'italic', margin: '5px 0 0 0' }}>Fifi's Food</h2>
       </header>
 
-      {/* BANNER DINÁMICO CONECTADO AL ADMIN */}
-      <div style={{ 
-        backgroundColor: estaAbierto ? '#00c853' : '#d50000', 
-        color: '#fff', 
-        textAlign: 'center', 
-        padding: '8px', 
-        fontSize: '12px', 
-        fontWeight: 'bold', 
-        textTransform: 'uppercase' 
-      }}>
+      <div style={{ backgroundColor: estaAbierto ? '#00c853' : '#d50000', color: '#fff', textAlign: 'center', padding: '8px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>
         {estaAbierto ? '● Abiertos ahora en Managua' : '○ Cerrado por ahora'}
       </div>
 
@@ -102,7 +86,7 @@ export default function Home() {
       <section style={{ padding: '0 20px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {filtrados.map(prod => (
-            <div key={prod.id} onClick={() => !prod.agotado && (setProductoDetalle(prod), setCantidadTemporal(pedido[prod.id] || 1))} style={{ backgroundColor: '#111', padding: '20px', borderRadius: '25px', border: '1px solid #222', opacity: prod.agotado ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div key={prod.id} onClick={() => !prod.agotado && estaAbierto && (setProductoDetalle(prod), setCantidadTemporal(pedido[prod.id] || 1))} style={{ backgroundColor: '#111', padding: '20px', borderRadius: '25px', border: '1px solid #222', opacity: (prod.agotado || !estaAbierto) ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '15px' }}>
               {prod.imagen && (
                 <div style={{ width: '90px', height: '90px', borderRadius: '15px', overflow: 'hidden', flexShrink: 0 }}>
                   <img src={prod.imagen} alt={prod.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -113,7 +97,6 @@ export default function Home() {
                 <p style={{ color: '#777', fontSize: '12px', margin: '4px 0 10px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{prod.desc}</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: '#FF8C00', fontWeight: '900', fontSize: '18px' }}>C$ {prod.precio}</span>
-                  {pedido[prod.id] > 0 && <span style={{ backgroundColor: '#FF8C00', color: '#000', padding: '2px 10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px' }}>{pedido[prod.id]}</span>}
                 </div>
               </div>
             </div>
@@ -153,15 +136,9 @@ export default function Home() {
                 })
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', justifyContent: 'center', height: '100%' }}>
-                   <button style={{ width: '100%', backgroundColor: '#111', color: '#fff', padding: '30px', borderRadius: '25px', border: '2px solid #222', fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
-                    🥡 Retirar en local
-                   </button>
-                   <button style={{ width: '100%', backgroundColor: '#111', color: '#fff', padding: '30px', borderRadius: '25px', border: '2px solid #222', fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
-                    🛵 Pedir Delivery
-                   </button>
-                   <button onClick={() => setPasoFinal(false)} style={{ width: '100%', backgroundColor: '#050505', color: '#777', padding: '25px', borderRadius: '25px', border: '1px dashed #333', fontSize: '18px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', marginTop: '10px' }}>
-                    ↩️ Volver al carrito
-                   </button>
+                   <button style={{ width: '100%', backgroundColor: '#111', color: '#fff', padding: '30px', borderRadius: '25px', border: '2px solid #222', fontSize: '20px', fontWeight: 'bold' }}>🥡 Retirar en local</button>
+                   <button style={{ width: '100%', backgroundColor: '#111', color: '#fff', padding: '30px', borderRadius: '25px', border: '2px solid #222', fontSize: '20px', fontWeight: 'bold' }}>🛵 Pedir Delivery</button>
+                   <button onClick={() => setPasoFinal(false)} style={{ width: '100%', backgroundColor: '#050505', color: '#777', padding: '25px', borderRadius: '25px', border: '1px dashed #333', fontSize: '18px', fontWeight: 'bold' }}>↩️ Volver al carrito</button>
                 </div>
               )}
             </div>
@@ -172,8 +149,11 @@ export default function Home() {
                 <span style={{ color: '#FF8C00' }}>C$ {montoTotal}</span>
               </div>
               {!pasoFinal && (
-                <button onClick={() => setPasoFinal(true)} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900' }}>
-                  CONTINUAR
+                <button 
+                  onClick={() => estaAbierto ? setPasoFinal(true) : null} 
+                  style={{ width: '100%', backgroundColor: estaAbierto ? '#FF8C00' : '#333', color: estaAbierto ? '#000' : '#777', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900' }}
+                >
+                  {estaAbierto ? 'CONTINUAR' : 'LOCAL CERRADO POR AHORA'}
                 </button>
               )}
             </div>
@@ -181,16 +161,18 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* BOTÓN FLOTANTE DEL CARRITO */}
       {Object.values(pedido).length > 0 && !productoDetalle && !verResumen && (
-        <button onClick={() => setVerResumen(true)} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', backgroundColor: '#FF8C00', color: '#000', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', zIndex: 100 }}>
-          Ver Carrito (C$ {montoTotal})
+        <button 
+          onClick={() => setVerResumen(true)} 
+          style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', backgroundColor: estaAbierto ? '#FF8C00' : '#d50000', color: estaAbierto ? '#000' : '#fff', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', zIndex: 100 }}
+        >
+          {estaAbierto ? `Ver Carrito (C$ ${montoTotal})` : 'CERRADO POR EL MOMENTO'}
         </button>
       )}
 
-      {/* MODAL DETALLE DE PRODUCTO */}
+      {/* MODAL DETALLE PRODUCTO - BLOQUEADO SI CERRADO */}
       <AnimatePresence>
-        {productoDetalle && (
+        {productoDetalle && estaAbierto && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setProductoDetalle(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 200 }} />
             <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#111', borderTopLeftRadius: '30px', borderTopRightRadius: '30px', padding: '40px 30px', zIndex: 300 }}>
