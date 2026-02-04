@@ -39,12 +39,10 @@ export default function Home() {
     return acc + (prod ? prod.precio * parseInt(cant) : 0);
   }, 0);
 
-  // FUNCIÓN CORREGIDA: NO PERMITE AGREGAR CEROS
   const confirmarAlCarrito = () => {
     if (cantidadTemporal > 0) {
       setPedido({ ...pedido, [productoDetalle.id]: cantidadTemporal });
     } else {
-      // Si el usuario pone 0, eliminamos el producto del pedido por si ya estaba
       const nuevoPedido = { ...pedido };
       delete nuevoPedido[productoDetalle.id];
       setPedido(nuevoPedido);
@@ -90,14 +88,25 @@ export default function Home() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', overflowX: 'auto', padding: '20px', gap: '10px' }}>
-        {['Todas', 'Hamburguesas', 'Pollo', 'Salchipapas', 'Antojos', 'Bebidas'].map(cat => (
-          <button key={cat} onClick={() => setCategoria(cat)} style={{ padding: '10px 25px', borderRadius: '50px', border: 'none', backgroundColor: categoria === cat ? '#FF8C00' : '#1a1a1a', color: categoria === cat ? '#000' : '#fff', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{cat}</button>
-        ))}
+      {/* AQUÍ ESTÁ EL CAMBIO STICKY - NADA MÁS SE TOCÓ */}
+      <div style={{ 
+        position: 'sticky', 
+        top: '0', 
+        zIndex: 100, 
+        backgroundColor: 'rgba(0,0,0,0.9)', 
+        backdropFilter: 'blur(10px)', 
+        padding: '15px 0',
+        marginTop: '10px'
+      }}>
+        <div style={{ display: 'flex', overflowX: 'auto', padding: '0 20px', gap: '10px' }}>
+          {['Todas', 'Hamburguesas', 'Pollo', 'Salchipapas', 'Antojos', 'Bebidas'].map(cat => (
+            <button key={cat} onClick={() => setCategoria(cat)} style={{ padding: '10px 25px', borderRadius: '50px', border: 'none', backgroundColor: categoria === cat ? '#FF8C00' : '#1a1a1a', color: categoria === cat ? '#000' : '#fff', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{cat}</button>
+          ))}
+        </div>
       </div>
 
       <section style={{ padding: '0 20px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '10px' }}>
           {filtrados.map(prod => (
             <div key={prod.id} onClick={() => !prod.agotado && estaAbierto && (setProductoDetalle(prod), setCantidadTemporal(pedido[prod.id] || 1))} style={{ backgroundColor: '#111', padding: '20px', borderRadius: '25px', border: '1px solid #222', opacity: (prod.agotado || !estaAbierto) ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '15px' }}>
               {prod.imagen && (
@@ -137,9 +146,7 @@ export default function Home() {
                       </div>
                       <div style={{ flex: 1 }}>
                         <h4 style={{ margin: 0, fontSize: '16px' }}>{item?.nombre}</h4>
-                        <p style={{ color: '#777', fontSize: '11px', margin: '2px 0', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                          {item?.desc}
-                        </p>
+                        <p style={{ color: '#777', fontSize: '11px', margin: '2px 0', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item?.desc}</p>
                         <p style={{ color: '#FF8C00', margin: '4px 0', fontWeight: 'bold' }}>C$ {item?.precio}</p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                           <button onClick={() => modificarCantidadCarrito(id, -1)} style={{ width: '28px', height: '28px', borderRadius: '8px', border: '1px solid #333', background: 'none', color: '#fff' }}>-</button>
@@ -166,12 +173,7 @@ export default function Home() {
                 <span style={{ color: '#FF8C00' }}>C$ {montoTotal}</span>
               </div>
               {!pasoFinal && (
-                <button 
-                  onClick={() => estaAbierto ? setPasoFinal(true) : null} 
-                  style={{ width: '100%', backgroundColor: estaAbierto ? '#FF8C00' : '#333', color: estaAbierto ? '#000' : '#777', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900' }}
-                >
-                  {estaAbierto ? 'CONTINUAR' : 'LOCAL CERRADO POR AHORA'}
-                </button>
+                <button onClick={() => estaAbierto ? setPasoFinal(true) : null} style={{ width: '100%', backgroundColor: estaAbierto ? '#FF8C00' : '#333', color: estaAbierto ? '#000' : '#777', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900' }}>{estaAbierto ? 'CONTINUAR' : 'LOCAL CERRADO POR AHORA'}</button>
               )}
             </div>
           </motion.div>
@@ -179,12 +181,7 @@ export default function Home() {
       </AnimatePresence>
 
       {Object.values(pedido).length > 0 && !productoDetalle && !verResumen && (
-        <button 
-          onClick={() => setVerResumen(true)} 
-          style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', backgroundColor: estaAbierto ? '#FF8C00' : '#d50000', color: estaAbierto ? '#000' : '#fff', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', zIndex: 100 }}
-        >
-          {estaAbierto ? `Ver Carrito (C$ ${montoTotal})` : 'CERRADO POR EL MOMENTO'}
-        </button>
+        <button onClick={() => setVerResumen(true)} style={{ position: 'fixed', bottom: '30px', left: '20px', right: '20px', backgroundColor: estaAbierto ? '#FF8C00' : '#d50000', color: estaAbierto ? '#000' : '#fff', padding: '18px', borderRadius: '20px', border: 'none', fontWeight: '900', zIndex: 100 }}>{estaAbierto ? `Ver Carrito (C$ ${montoTotal})` : 'CERRADO POR EL MOMENTO'}</button>
       )}
 
       <AnimatePresence>
@@ -203,10 +200,7 @@ export default function Home() {
                   <button onClick={() => setCantidadTemporal(cantidadTemporal + 1)} style={{ backgroundColor: '#FF8C00', border: 'none', width: '40px', height: '40px', borderRadius: '15px' }}>+</button>
                 </div>
               </div>
-              {/* CAMBIO AQUÍ: Llamamos a confirmarAlCarrito que ya tiene la validación de > 0 */}
-              <button onClick={confirmarAlCarrito} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900' }}>
-                AGREGAR (C$ {productoDetalle.precio * cantidadTemporal})
-              </button>
+              <button onClick={confirmarAlCarrito} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900' }}>AGREGAR (C$ {productoDetalle.precio * cantidadTemporal})</button>
             </motion.div>
           </>
         )}
