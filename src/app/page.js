@@ -39,6 +39,19 @@ export default function Home() {
     return acc + (prod ? prod.precio * parseInt(cant) : 0);
   }, 0);
 
+  // FUNCIÓN CORREGIDA: NO PERMITE AGREGAR CEROS
+  const confirmarAlCarrito = () => {
+    if (cantidadTemporal > 0) {
+      setPedido({ ...pedido, [productoDetalle.id]: cantidadTemporal });
+    } else {
+      // Si el usuario pone 0, eliminamos el producto del pedido por si ya estaba
+      const nuevoPedido = { ...pedido };
+      delete nuevoPedido[productoDetalle.id];
+      setPedido(nuevoPedido);
+    }
+    setProductoDetalle(null);
+  };
+
   const modificarCantidadCarrito = (id, delta) => {
     setPedido(prev => {
       const nuevo = { ...prev };
@@ -124,7 +137,6 @@ export default function Home() {
                       </div>
                       <div style={{ flex: 1 }}>
                         <h4 style={{ margin: 0, fontSize: '16px' }}>{item?.nombre}</h4>
-                        {/* AQUÍ ESTÁ LA DESCRIPCIÓN DE NUEVO */}
                         <p style={{ color: '#777', fontSize: '11px', margin: '2px 0', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                           {item?.desc}
                         </p>
@@ -191,7 +203,10 @@ export default function Home() {
                   <button onClick={() => setCantidadTemporal(cantidadTemporal + 1)} style={{ backgroundColor: '#FF8C00', border: 'none', width: '40px', height: '40px', borderRadius: '15px' }}>+</button>
                 </div>
               </div>
-              <button onClick={() => { setPedido({...pedido, [productoDetalle.id]: cantidadTemporal}); setProductoDetalle(null); }} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900' }}>AGREGAR (C$ {productoDetalle.precio * cantidadTemporal})</button>
+              {/* CAMBIO AQUÍ: Llamamos a confirmarAlCarrito que ya tiene la validación de > 0 */}
+              <button onClick={confirmarAlCarrito} style={{ width: '100%', backgroundColor: '#FF8C00', color: '#000', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900' }}>
+                AGREGAR (C$ {productoDetalle.precio * cantidadTemporal})
+              </button>
             </motion.div>
           </>
         )}
